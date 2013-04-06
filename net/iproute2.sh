@@ -84,13 +84,28 @@ _set_mac_address()
 
 _get_inet_addresses()
 {
-	LC_ALL=C ip -family inet addr show "${IFACE}" | \
-	sed -n -e 's/.*inet \([^ ]*\).*/\1/p'
+	local family="$1";
+	if [ -z "$family" ]; then
+		family="inet"
+	fi
+	LC_ALL=C ip -family $family addr show "${IFACE}" | \
+	sed -n -e 's/.*inet6\? \([^ ]*\).*/\1/p'
+}
+
+_get_inet6_addresses() {
+	_get_inet_addresses "inet6"
 }
 
 _get_inet_address()
 {
 	set -- $(_get_inet_addresses)
+	[ $# = "0" ] && return 1
+	echo "$1"
+}
+
+_get_inet6_address()
+{
+	set -- $(_get_inet6_addresses)
 	[ $# = "0" ] && return 1
 	echo "$1"
 }

@@ -86,19 +86,39 @@ _get_inet_address()
 	echo "/$(_netmask2cidr "$1")"
 }
 
-_get_inet_addresses()
+_get_inet6_address()
 {
+	set -- $(LC_ALL=C ifconfig "${IFACE}" |
+	sed -n -e 's/.*\(inet6 addr:\|inet6\) \([^ /]*\)\(\/\| *prefixlen \)\([^ ]*\).*/\2\/\4/p')
+	[ -z "$1" ] && return 1
+
+	echo -n "$1"
+}
+
+_get_addresses_fn()
+{
+	local fn="$1"
 	local iface=${IFACE} i=0
-	local addrs="$(_get_inet_address)"
+	local addrs="$($fn)"
 
 	while true; do
 		local IFACE="${iface}:${i}"
 		_exists || break
-		local addr="$(_get_inet_address)"
+		local addr="$($fn)"
 		[ -n "${addr}" ] && addrs="${addrs}${addrs:+ }${addr}"
 		: $(( i += 1 ))
 	done
 	echo "${addrs}"
+}
+
+_get_inet_addresses()
+{
+	_get_addresses_fn _get_inet_address
+}
+
+_get_inet6_addresses()
+{
+	_get_addresses_fn _get_inet6_address
 }
 
 _cidr2netmask()

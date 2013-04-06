@@ -13,7 +13,7 @@ SRCS-Linux=	iwconfig.sh.in udhcpc.sh.in
 INC-Linux=	adsl.sh apipa.sh arping.sh bonding.sh br2684ctl.sh bridge.sh \
 		ccwgroup.sh clip.sh ethtool.sh iproute2.sh ifplugd.sh ip6to4.sh \
 		ipppd.sh iwconfig.sh netplugd.sh pppd.sh pump.sh tuntap.sh udhcpc.sh \
-		vlan.sh macvlan.sh ip6rd.sh firewalld.sh
+		vlan.sh macvlan.sh ip6rd.sh firewalld.sh dhclientv6.sh
 
 SRCS-NetBSD= ifwatchd.sh.in
 INC-NetBSD=	ifwatchd.sh

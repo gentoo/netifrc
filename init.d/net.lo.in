@@ -214,6 +214,11 @@ _show_address()
 	einfo "received address $(_get_inet_address "${IFACE}")"
 }
 
+_show_address6()
+{
+	einfo "received address $(_get_inet6_address "${IFACE}")"
+}
+
 # Basically sorts our modules into order and saves the list
 _gen_module_list()
 {
