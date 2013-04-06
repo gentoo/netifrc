@@ -295,6 +295,10 @@ _get_errorhandler_behavior() {
 			echo "$value" && break
 		fi
 	done
+
+_show_address6()
+{
+	einfo "received address $(_get_inet6_address "${IFACE}")"
 }
 
 # Basically sorts our modules into order and saves the list

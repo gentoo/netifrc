@@ -519,6 +519,41 @@
 # use any of them.
 
 #-----------------------------------------------------------------------------
+# DHCPv6
+# DHCPv6 can be provided by dhclient
+#
+# dhclient: emerge net-misc/dhcp
+#
+# If you have more than one DHCP client installed, you should probably
+# explicitly use 'dhclient' to use dhclient for both DHCP and DHCPv6,
+# otherwise the default DHCP client will be used.  dhcpcd has some stateless
+# IPv6 autoconfiguration support which may clash with DHCPv6.
+#modules="dhclient" # to select dhclient over dhcpcd
+
+# Regardless of which DHCP client you prefer, you configure them the
+# same way using one of following depending on which interface modules
+# you're using.
+#config_eth0="dhcpv6"
+
+# You can also use both DHCP and DHCPv6 on a dual-stack network:
+#config_eth0="dhcp
+#dhcpv6"
+
+# To pass runtime arguments to dhclient for DHCPv6, you do it similarly to
+# setting runtime arguments for DHCP.  Note that you can set options for
+# DHCPv6 separately or in addition the dhclient arguments for DHCP.
+#dhclientv6_eth0="..." # options for DHCPv6 only
+#dhclient_eth0='..."   # options for DHCP (also for DHCPv6 when no
+#                      # dhclientv6_eth0 is defined)
+
+# GENERIC DHCPv6 OPTIONS
+# Set generic DHCPv6 options just as with generic DHCP options.
+#dhcpv6_eth0="release nodns nontp nonis nogateway nosendhost"
+
+# If no generic DHCPv6 options are set, the default is to fall back to the
+# DHCP generic options.
+
+#-----------------------------------------------------------------------------
 # For APIPA support, emerge net-misc/iputils or net-analyzer/arping
 
 # APIPA is a module that tries to find a free address in the range
