@@ -1,0 +1,4 @@
+The default configuration automatically uses DHCP to configure any
+network interfaces started by these scripts.
+To create a more complete configuration, please review net.example in this
+directory and save your configuration in /etc/conf.d/net.

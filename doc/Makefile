@@ -1,4 +1,5 @@
 DIR=	${DOCDIR}/gentoo-oldnet
+CONF= README
 SRCS=	net.example.in
 INC=	net.example
 
