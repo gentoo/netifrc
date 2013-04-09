@@ -15,5 +15,5 @@ include ${MK}/subdir.mk
 include ${MK}/dist.mk
 include ${MK}/git.mk
 
-_installafter:
+_installafter: realinstall
 	${ECHO} "${VERSION}${GITVER}" > ${DESTDIR}/${LIBEXECDIR}/version
