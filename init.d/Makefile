@@ -1,9 +1,8 @@
 DIR=	${INITDIR}
-INSTALLAFTER=	_installafter_net.lo
-SRCS= net.lo.in
 BIN=	${OBJS}
 
-# Build our old net foo or not
+INSTALLAFTER=	_installafter_net.lo
+SRCS= net.lo.in
 
 MK=	../mk
 include ${MK}/os.mk
