@@ -40,7 +40,7 @@ LIBDIR?=		${UPREFIX}/${LIBNAME}
 LIBMODE?=		0444
 SHLIBDIR?=		${PREFIX}/${LIBNAME}
 
-LIBEXECDIR?=		${PREFIX}/libexec/gentoo-oldnet
+LIBEXECDIR?=		${PREFIX}/libexec/netifrc
 
 MANPREFIX?=		${UPREFIX}/share
 MANDIR?=		${MANPREFIX}/man

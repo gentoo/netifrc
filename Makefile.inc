@@ -1,3 +1,3 @@
-NAME=		gentoo-oldnet
+NAME=		netifrc
 VERSION=	0.1
 PKG=		${NAME}-${VERSION}
