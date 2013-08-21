@@ -252,50 +252,8 @@ _ip_rule_runner() {
 	veoutdent
 }
 
-iproute2_pre_start()
+_iproute2_policy_routing()
 {
-	local tunnel=
-	eval tunnel=\$iptunnel_${IFVAR}
-	if [ -n "${tunnel}" ]; then
-		# Set our base metric to 1000
-		metric=1000
-		# Bug#347657: If the mode is 'ipip6' or 'ip6ip6', the -6 must be passed
-		# to iproute2 during tunnel creation.
-		local ipproto=''
-		[ "${tunnel##mode ipip6}" != "${tunnel}" ] && ipproto='-6'
-		[ "${tunnel##mode ip6ip6}" != "${tunnel}" ] && ipproto='-6'
-
-		ebegin "Creating tunnel ${IFVAR}"
-		ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
-		eend $? || return 1
-		_up
-	fi
-
-	# MTU support
-	local mtu=
-	eval mtu=\$mtu_${IFVAR}
-	[ -n "${mtu}" ] && ip link set dev "${IFACE}" mtu "${mtu}"
-
-	# TX Queue Length support
-	local len=
-	eval len=\$txqueuelen_${IFVAR}
-	[ -n "${len}" ] && ip link set dev "${IFACE}" txqueuelen "${len}"
-
-	return 0
-}
-
-_iproute2_ipv6_tentative()
-{
-	# Only check tentative when we have a carrier.
-	_has_carrier || return 1
-	LC_ALL=C ip addr show dev "${IFACE}" | \
-		grep -q "^[[:space:]]*inet6 .* tentative"
-}
-
-iproute2_post_start()
-{
-	local n=5
-
 	# Kernel may not have IP built in
 	if [ -e /proc/net/route ]; then
 		local rules="$(_get_array "rules_${IFVAR}")"
@@ -325,6 +283,61 @@ iproute2_post_start()
 		fi
 		ip -6 route flush table cache dev "${IFACE}"
 	fi
+}
+
+iproute2_pre_start()
+{
+	local tunnel=
+	eval tunnel=\$iptunnel_${IFVAR}
+	if [ -n "${tunnel}" ]; then
+		# Set our base metric to 1000
+		metric=1000
+		# Bug#347657: If the mode is 'ipip6' or 'ip6ip6', the -6 must be passed
+		# to iproute2 during tunnel creation.
+		local ipproto=''
+		[ "${tunnel##mode ipip6}" != "${tunnel}" ] && ipproto='-6'
+		[ "${tunnel##mode ip6ip6}" != "${tunnel}" ] && ipproto='-6'
+
+		ebegin "Creating tunnel ${IFVAR}"
+		ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
+		eend $? || return 1
+		_up
+	fi
+
+	# MTU support
+	local mtu=
+	eval mtu=\$mtu_${IFVAR}
+	[ -n "${mtu}" ] && ip link set dev "${IFACE}" mtu "${mtu}"
+
+	# TX Queue Length support
+	local len=
+	eval len=\$txqueuelen_${IFVAR}
+	[ -n "${len}" ] && ip link set dev "${IFACE}" txqueuelen "${len}"
+
+	local policyroute_order=
+	eval policyroute_order=\$policy_rules_before_routes_${IFVAR}
+	[ -z "$policyroute_order" ] && policyroute_order=${policy_rules_before_routes:-no}
+	yesno "$policyroute_order" && _iproute2_policy_routing
+
+	return 0
+}
+
+_iproute2_ipv6_tentative()
+{
+	# Only check tentative when we have a carrier.
+	_has_carrier || return 1
+	LC_ALL=C ip addr show dev "${IFACE}" | \
+		grep -q "^[[:space:]]*inet6 .* tentative"
+}
+
+iproute2_post_start()
+{
+	local n=5
+
+	local policyroute_order=
+	eval policyroute_order=\$policy_rules_before_routes_${IFVAR}
+	[ -z "$policyroute_order" ] && policyroute_order=${policy_rules_before_routes:-no}
+	yesno "$policyroute_order" || _iproute2_policy_routing
 
 	if _iproute2_ipv6_tentative; then
 		ebegin "Waiting for IPv6 addresses"

@@ -1008,6 +1008,11 @@
 #from 2001:0DB8:AAAA:BBBB::/64 table vpn priority 100
 #to 2001:0DB8:AAAA:BBBB::/64 table vpn priority 150"
 
+# On rare occasions you may want routing policy rules to be applied
+# before routes are applied, rather than after.  This can be controlled
+# via 'policy_rules_before_routes', which defaults to 'no'.  See 
+# https://bugs.gentoo.org/show_bug.cgi?id=446606 for a discussion.
+#policy_rules_before_routes_eth0="yes"
 
 #-----------------------------------------------------------------------------
 # System
