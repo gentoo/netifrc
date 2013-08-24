@@ -324,15 +324,15 @@ iproute2_pre_start()
 
 _iproute2_ipv6_tentative()
 {
-	# Only check tentative when we have a carrier.
-	_has_carrier || return 1
 	LC_ALL=C ip addr show dev "${IFACE}" | \
 		grep -q "^[[:space:]]*inet6 .* tentative"
 }
 
 iproute2_post_start()
 {
-	local n=5
+	local n=
+	eval n=\$dad_timeout_${IFVAR}
+	[ -z "$n" ] && n=${dad_timeout:-5}
 
 	local policyroute_order=
 	eval policyroute_order=\$policy_rules_before_routes_${IFVAR}

@@ -133,6 +133,15 @@
 # long we wait for carrier. The current default is disabled.
 #carrier_timeout_eth0=0
 
+# IPv6 addresses usually must complete a duplicate address detection process
+# before they can be bound to by daemons; they are held in a 'tentative' state
+# until this completes.  Setting the 'nodad' flag (see config_eth0 above) is
+# one way to avoid this tentative state, otherwise the service will wait
+# dad_timeout seconds (defaults to 5) for tentative state to clear on all IPv6
+# addresses set on the interface.  As usual, dad_timeout can be adjusted on a
+# per-interface basis.  Set to 0 to disable the wait entirely.
+#dad_timeout_eth0=5
+
 # You may wish to disable the interface being brought down when stopping.
 # This is only of use for WakeOnLan.
 #ifdown_eth0="NO"
