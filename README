@@ -1,6 +1,19 @@
 netifrc README
 
-You should probably go and read the OpenRC README.
+This package provides a system of modules to manage and configure network
+interfaces via individual per-interface scripts in /etc/init.d.  Provided
+is the parent script "/etc/init.d/net.lo", which should be symlinked to
+create additional scripts for each interface to be configured:
+
+	ln -s /etc/init.d/net.{lo,eth0}
+
+Configuration is handled in "/etc/conf.d/net".  A default (empty or missing)
+/etc/conf.d/net automatically uses DHCP to configure any network interfaces 
+started by these scripts.  To create a more complete configuration, please 
+review net.example* in the doc directory and save your configuration 
+in /etc/conf.d/net.
+
+You should also probably go and read the OpenRC README.
 
 netifrc is what was previously called 'oldnet' in OpenRC, and was the only
 networking system in Baselayout 1.x. This system has been around a very long
