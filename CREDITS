@@ -1,0 +1,80 @@
+What follows is a listing of everybody known to have contributed to this
+networking stack, since the first CVS Changelog entry on 02 September 2001. If
+you contributed before that point, we've love to hear from you.
+
+If you need an older per-commit history, please see the OpenRC [1] and
+rc-scripts [2] and Baselayout [3] history.
+
+netifrc Git era [0] 2013/03/18-:
+--------------------------------
+William Hubbs <w.d.hubbs@gmail.com>
+Robin H. Johnson <robbat2@orbis-terrarum.net>
+
+OpenRC Git era [1] 2007/04/05-2013/03/18:
+-----------------------------------------
+Alexander Tsoy <alexander@tsoy.me>
+Alon Bar-Lev <alon.barlev@gmail.com>
+Anthony G. Basile <basile@opensource.dyc.edu>
+Björn Baumbach <bb@sernet.de>
+Christian <christian@ch-sc.de>
+Christian Ruppert <idl0r@gentoo.org>
+Christian Wetzig <gentoo@wetzig.de>
+Daniel Mierswa <impulze@impulze.org>
+Doug Goldstein <cardoe@cardoe.com>
+Gilles Oivier <g.olivier@wanadoo.fr>
+Jory A. Pratt <anarchy@gentoo.org>
+Kfir Lavi <lavi.kfir@gmail.com>
+Lorand Kelemen <lorand.kelemen@indgroup.eu>
+Marc Joliet <marcec@gmx.de>
+Marien Zwart <marienz@gentoo.org>
+Mike Frysinger <vapier@gentoo.org>
+Nao Nakashima <nao.nakashima@gmail.com>
+Robin H. Johnson <robbat2@gentoo.org>, <robbat2@orbis-terrarum.net>
+Roy Marples <roy@marples.name>
+Salah Coronya <salah.coronya@gmail.com>
+Seth Robertson <in-gentoo@baka.org>
+Stefan Knoblich <s.knoblich@axsentis.de>
+Stef Simoens <stef.simoens@scarlet.be>
+Trevor Summers Smith <trevorsummerssmith@gmail.com>
+William Hubbs <w.d.hubbs@gmail.com>, <williamh@gentoo.org>
+Yun Zheng Hu <hu@fox-it.com>
+
+baselayout SVN era [2] 2005/06/05-2007/04/05:
+---------------------------------------------
+(TODO: 
+- this era had a conversion to the BSD-2 license
+- credits for bugs are very lacking in this era)
+Martin Schlemmer <azarah@gentoo.org>
+Mike Frysinger <vapier@gentoo.org>
+Roy Marples <uberlord@gentoo.org>
+
+rc-scripts CVS era [3], 2001/09-2005/06/05:
+-------------------------------------------
+Andy Dustman <andy-gentoo.54e552@dustman.net>
+Aron Griffis <agriffis@gentoo.org>
+Asbjorn Sannes <ace@sannes.org>
+C. Brewer <killian@gentoo.org>
+Daniel Robbins <drobbins@gentoo.org>
+Donny Davies <woodchip@gentoo.org>
+Jason Rhinelander <jason-gentoo@gossamer-threads.com>
+jochen <jochen.eisinger@gmx.de>
+Jordan Ritter <jpr5+gentoo@darkridge.com>
+Marius Mauch <genone@genone.de>, <genone@gentoo.org>
+Martin Schlemmer <azarah@gentoo.org>
+Mike Frysinger <vapier@gentoo.org>
+<naanyaar2000@yahoo.com>
+nth <y.lesaint@free.fr>
+Rachel Holmes <rach@gmx.net>
+Robin H. Johnson <robbat2@gentoo.org>, <robbat2@orbis-terrarum.net>
+Roy Marples <uberlord@gentoo.org>
+Wout Mertens <wmertens@gentoo.org>
+YAMAKURA Makoto <makoto@dsb.club.ne.jp>
+
+0. http://git.overlays.gentoo.org/gitweb/?p=proj/netifrc.git;a=summary
+
+1. http://git.overlays.gentoo.org/gitweb/?p=proj/openrc.git;a=summary
+   Commit 838c9efb36b3b058c5a5b9d0e8c6d4d4789a44b9 removed net/.
+
+2. http://sources.gentoo.org/cgi-bin/viewvc.cgi/baselayout/
+
+3. http://sources.gentoo.org/cgi-bin/viewvc.cgi/gentoo-src/rc-scripts/
