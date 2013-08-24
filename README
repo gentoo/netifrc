@@ -1,0 +1,19 @@
+netifrc README
+
+You should probably go and read the OpenRC README.
+
+netifrc is what was previously called 'oldnet' in OpenRC, and was the only
+networking system in Baselayout 1.x. This system has been around a very long
+time, at least as far back as September 2001 (that was the rc-scripts-1.1.5
+release).
+
+If you're interested in who contributed to this, please see the extensive
+CREDITS file.
+
+Reporting Bugs
+--------------
+Since Gentoo Linux is hosting OpenRC development, Bugs should go to
+the Gentoo Bugzilla:
+	http://bugs.gentoo.org/
+They should be filed under the "Gentoo Hosted Projects" product and
+the "netifrc" component.

@@ -66,35 +66,35 @@ vlan_post_start()
 		einfo "Adding VLAN ${vlan} to ${IFACE}"
 		# We need to gather all interface configuration options
 		# 1) naming. Default to the standard "${IFACE}.${vlan}" but it can be anything
-		eval vname=\$${IFACE}_vlan${vlan}_name
+		eval vname=\$${IFVAR}_vlan${vlan}_name
 		[ -z "${vname}" ] && eval vname=\$vlan${vlan}_name
 		[ -z "${vname}" ] && vname="${IFACE}.${vlan}"
 		# 2) flags
-		eval vflags=\$${IFACE}_vlan${vlan}_flags
+		eval vflags=\$${IFVAR}_vlan${vlan}_flags
 		[ -z "${vflags}" ] && eval vflags=\$vlan${vlan}_flags
 		# 3) ingress/egress map
-		eval vingress=\$${IFACE}_vlan${vlan}_ingress
+		eval vingress=\$${IFVAR}_vlan${vlan}_ingress
 		[ -z "${vingress}" ] && eval vingress=\$vlan${vlan}_ingress
 		[ -z "${vingress}" ] || vingress="ingress-qos-map ${vingress}"
-		eval vegress=\$${IFACE}_vlan${vlan}_egress
+		eval vegress=\$${IFVAR}_vlan${vlan}_egress
 		[ -z "${vegress}" ] && eval vegress=\$vlan${vlan}_egress
 		[ -z "${vegress}" ] || vegress="egress-qos-map ${vegress}"
 
 		# txqueue
 		local txqueuelen=
-		eval txqueuelen=\$txqueuelen_${IFACE}_vlan${vlan}
+		eval txqueuelen=\$txqueuelen_${IFVAR}_vlan${vlan}
 		[ -z "${txqueuelen}" ] && eval txqueuelen=\$txqueuelen_vlan${vlan}
 		# mac
 		local mac=
-		eval mac=\$mac_${IFACE}_vlan${vlan}
+		eval mac=\$mac_${IFVAR}_vlan${vlan}
 		[ -z "${mac}" ] && eval mac=\$mac_vlan${vlan}
 		# broadcast
 		local broadcast=
-		eval broadcast=\$broadcast_${IFACE}_vlan${vlan}
+		eval broadcast=\$broadcast_${IFVAR}_vlan${vlan}
 		[ -z "${broadcast}" ] && eval broadcast=\$broadcast_vlan${vlan}
 		# mtu
 		local mtu=
-		eval mtu=\$mtu_${IFACE}_vlan${vlan}
+		eval mtu=\$mtu_${IFVAR}_vlan${vlan}
 		[ -z "${mtu}" ] && eval mtu=\$mtu_vlan${vlan}
 
 		# combine it all
