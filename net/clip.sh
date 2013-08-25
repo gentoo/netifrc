@@ -73,10 +73,11 @@ atmclip_svcs_stop()
 
 are_atmclip_svcs_running()
 {
-
+	[ -f /var/run/atmarpd.pid ] || return 1
 	start-stop-daemon --quiet --test --stop --pidfile /var/run/atmarpd.pid || return 1
 
 	if yesno ${clip_full:-yes}; then
+		[ -f /var/run/ilmid.pid -a -f /var/run/atmsigd.pid ] || return 1
 		start-stop-daemon --quiet --test --stop --pidfile /var/run/ilmid.pid || return 1
 		start-stop-daemon --quiet --test --stop --pidfile /var/run/atmsigd.pid || return 1
 	fi
