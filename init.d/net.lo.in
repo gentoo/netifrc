@@ -463,7 +463,7 @@ _load_config()
 		fi
 	else
 		if [ -z "$1" ]; then
-			ewarn "No configuration specified; defaulting to DHCP"
+			ewarn "config_${IFVAR} not specified; defaulting to DHCP"
 			config_0="dhcp"
 			config_index=1
 		fi
