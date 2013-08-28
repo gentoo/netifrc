@@ -332,7 +332,7 @@ iproute2_post_start()
 {
 	local n=
 	eval n=\$dad_timeout_${IFVAR}
-	[ -z "$n" ] && n=${dad_timeout:-5}
+	[ -z "$n" ] && n=${dad_timeout:-10}
 
 	local policyroute_order=
 	eval policyroute_order=\$policy_rules_before_routes_${IFVAR}
