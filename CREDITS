@@ -7,8 +7,11 @@ rc-scripts [2] and Baselayout [3] history.
 
 netifrc Git era [0] 2013/03/18-:
 --------------------------------
+Alexander Tsoy <alexander@tsoy.me>
+Andreas Kinzler <akinzler@gmx.de>
+Ian Stakenvicius <axs@gentoo.org>
+Robin H. Johnson <robbat2@gentoo.org>, <robbat2@orbis-terrarum.net>
 William Hubbs <w.d.hubbs@gmail.com>
-Robin H. Johnson <robbat2@orbis-terrarum.net>
 
 OpenRC Git era [1] 2007/04/05-2013/03/18:
 -----------------------------------------
