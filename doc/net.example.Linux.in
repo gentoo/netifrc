@@ -651,7 +651,9 @@
 # You can also configure the parameters of the bond here, which must be done
 # via sysfs on 2.6 kernels or newer. The description of all the options can be
 # found in the kernel: /usr/src/linux-*/Documentation/networking/bonding.txt
-# You will probably want the 'mode' option at the least.
+# You will probably want the 'mode' option at the least. Please beware that
+# some options are mutually exclusive, eg miimon & arp_*; again, see the kernel
+# documentation for more info.
 # Some possible parameters: mode fail_over_mac arp_validate arp_interval
 # arp_ip_target downdelay updelay lacp_rate ad_select xmit_hash_policy
 # num_grat_arp num_unsol_na miimon primary primary_reselect use_carrier
