@@ -208,9 +208,11 @@ _add_route()
 		set -- "${one}" "${two}" gw "$@"
 	fi
 
-	case "$@" in
-		*:*|default*) [ "$1" = "-net" -o "$1" = "-host" ] && shift;;
-	esac
+	if [ "$1" = "-net" -o "$1" = "-host" ]; then
+		if [ "${2##*:}" != "$2" ]; then shift
+		elif [ "$2" = "default" ]; then shift
+		fi
+	fi
 
 	route ${family} add "$@" dev "${IFACE}"
 }
