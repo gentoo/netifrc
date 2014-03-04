@@ -4,7 +4,7 @@
 
 include Makefile.inc
 
-SUBDIR =	doc init.d net sh
+SUBDIR =	doc init.d net sh udev_helper udev_rules
 
 INSTALLAFTER=	_installafter
 

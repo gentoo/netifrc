@@ -3,6 +3,7 @@
 
 SFX=		.Linux.in
 PKG_PREFIX?=	/usr
+UDEVDIR?=	$(shell pkg-config udev --variable=udevdir)
 
 CPPFLAGS+=	-D_BSD_SOURCE -D_XOPEN_SOURCE=700
 LIBDL=		-Wl,-Bdynamic -ldl
