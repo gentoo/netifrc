@@ -14,8 +14,17 @@ SNAP=		${_SNAP}
 SNAPDIR=	${DISTPREFIX}-${SNAP}
 SNAPFILE=	${SNAPDIR}.tar.bz2
 
-dist:
+gitdist:
 	git archive --prefix=${DISTPREFIX}/ ${GITREF} | bzip2 > ${DISTFILE}
+
+dist:
+	sh -c ' \
+	D=$$(mktemp -d) && \
+	mkdir $${D}/${DISTPREFIX} && \
+	git checkout-index -f -a --prefix=$${D}/${DISTPREFIX}/ && \
+	git log >$${D}/${DISTPREFIX}/ChangeLog && \
+	tar cjf ${DISTFILE} --owner=0 --group=0 --format=posix --mode=a+rX -C $$D ${DISTPREFIX} && \
+	rm -rf $$D '
 
 distcheck: dist
 	rm -rf ${DISTPREFIX}
