@@ -1,4 +1,5 @@
-DIR=	${DOCDIR}/netifrc
+PF ?=	netifrc
+DIR=	${DOCDIR}/${PF}
 SRCS=	net.example.in
 INC=	net.example
 
