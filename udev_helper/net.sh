@@ -16,6 +16,20 @@ case ${IFACE} in
 		exit 0 ;;
 esac
 
+is_service_enabled() {
+	local svc="$1"
+	[ ! -e "/etc/init.d/${svc}" ] && return 1
+	[ -e "/etc/runlevels/boot/${svc}" ] && return 0
+	[ -e "/etc/runlevels/default/${svc}" ] && return 0
+	[ -e "/etc/runlevels/sysinit/${svc}" ] && return 0
+	return 1
+}
+
+# stop here if OpenRC's so called "newnet" is enabled, bug #503530
+if is_service_enabled network; then
+	exit 0
+fi
+
 # stop here if coldplug is disabled, Bug #206518
 if [ "${do_not_run_plug_service}" = 1 ]; then
 	exit 0
