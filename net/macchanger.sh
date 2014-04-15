@@ -69,13 +69,13 @@ macchanger_pre_start()
 	fi
 
 	mac=$(/sbin/macchanger ${opts} "${IFACE}" \
-		| sed -n -e 's/^Faked MAC:.*\<\(..:..:..:..:..:..\)\>.*/\U\1/p' )
+		| sed -n -e 's/^\(Faked\|New\) MAC:.*\<\(..:..:..:..:..:..\)\>.*/\U\2/p' )
 	_up
 
 	# Sometimes the interface needs to be up ....
 	if [ -z "${mac}" ]; then
 		mac=$(/sbin/macchanger ${opts} "${IFACE}" \
-		| sed -n -e 's/^Faked MAC:.*\<\(..:..:..:..:..:..\)\>.*/\U\1/p' )
+		| sed -n -e 's/^\(Faked\|New\) MAC:.*\<\(..:..:..:..:..:..\)\>.*/\U\2/p' )
 	fi
 
 	if [ -z "${mac}" ]; then
