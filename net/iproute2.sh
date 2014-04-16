@@ -345,8 +345,9 @@ iproute2_pre_start()
 
 _iproute2_ipv6_tentative()
 {
-	LC_ALL=C ip addr show dev "${IFACE}" | \
-		grep -q "^[[:space:]]*inet6 .* tentative"
+	[ -n "$(LC_ALL=C ip -family inet6 addr show dev ${IFACE} tentative)" ] && return 0
+
+	return 1
 }
 
 iproute2_post_start()
