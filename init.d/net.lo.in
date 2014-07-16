@@ -218,16 +218,20 @@ _show_address()
 _gen_module_list()
 {
 	local x= f= force=$1
-	if ! ${force} && [ -s "${MODULESLIST}" -a "${MODULESLIST}" -nt "${MODULESDIR}" ]; then
-		local update=false
-		for x in "${MODULESDIR}"/*.sh; do
-			[ -e "${x}" ] || continue
-			if [ "${x}" -nt "${MODULESLIST}" ]; then
-				update=true
-				break
-			fi
-		done
-		${update} || return 0
+	if ! ${force} ; then
+		if [ -s "${MODULESLIST}" -a "${MODULESLIST}" -nt /proc/$$/status ]; then
+			ewarn "Discarding cached module list ($MODULESLIST) as it's newer current time!"
+		elif [ -s "${MODULESLIST}" -a "${MODULESLIST}" -nt "${MODULESDIR}" ]; then
+			local update=false
+			for x in "${MODULESDIR}"/*.sh; do
+				[ -e "${x}" ] || continue
+				if [ "${x}" -nt "${MODULESLIST}" ]; then
+					update=true
+					break
+				fi
+			done
+			${update} || return 0
+		fi
 	fi
 
 	einfo "Caching network module dependencies"
