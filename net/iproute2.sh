@@ -10,11 +10,13 @@ iproute2_depend()
 
 _up()
 {
+	veinfo ip link set dev "${IFACE}" up
 	ip link set dev "${IFACE}" up
 }
 
 _down()
 {
+	veinfo ip link set dev "${IFACE}" down
 	ip link set dev "${IFACE}" down
 }
 
@@ -57,6 +59,7 @@ _set_flag()
 		flag=${flag#-}
 		opt="off"
 	fi
+	veinfo ip link set dev "${IFACE}" "${flag}" "${opt}"
 	ip link set dev "${IFACE}" "${flag}" "${opt}"
 }
 
@@ -79,6 +82,7 @@ _get_mac_address()
 
 _set_mac_address()
 {
+	veinfo ip link set dev "${IFACE}" address "$1"
 	ip link set dev "${IFACE}" address "$1"
 }
 
@@ -98,6 +102,7 @@ _get_inet_address()
 _add_address()
 {
 	if [ "$1" = "127.0.0.1/8" -a "${IFACE}" = "lo" ]; then
+		veinfo ip addr add "$@" dev "${IFACE}" 2>/dev/null
 		ip addr add "$@" dev "${IFACE}" 2>/dev/null
 		return 0
 	fi
@@ -202,9 +207,12 @@ _add_route()
 
 _delete_addresses()
 {
+	veinfo ip addr flush dev "${IFACE}" scope global 2>/dev/null
 	ip addr flush dev "${IFACE}" scope global 2>/dev/null
+	veinfo ip addr flush dev "${IFACE}" scope site 2>/dev/null
 	ip addr flush dev "${IFACE}" scope site 2>/dev/null
 	if [ "${IFACE}" != "lo" ]; then
+		veinfo ip addr flush dev "${IFACE}" scope host 2>/dev/null
 		ip addr flush dev "${IFACE}" scope host 2>/dev/null
 	fi
 	return 0
@@ -217,6 +225,7 @@ _has_carrier()
 
 _tunnel()
 {
+	veinfo ip tunnel "$@"
 	ip tunnel "$@"
 }
 
@@ -266,6 +275,7 @@ _iproute2_policy_routing()
 				_ip_rule_runner -4 add "${rules}"
 			fi
 		fi
+		veinfo ip -4 route flush table cache dev "${IFACE}"
 		ip -4 route flush table cache dev "${IFACE}"
 	fi
 
@@ -281,6 +291,7 @@ _iproute2_policy_routing()
 				_ip_rule_runner -6 add "${rules}"
 			fi
 		fi
+		veinfo ip -6 route flush table cache dev "${IFACE}"
 		ip -6 route flush table cache dev "${IFACE}"
 	fi
 }
@@ -299,6 +310,7 @@ iproute2_pre_start()
 		[ "${tunnel##mode ip6ip6}" != "${tunnel}" ] && ipproto='-6'
 
 		ebegin "Creating tunnel ${IFVAR}"
+		veinfo ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
 		ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
 		eend $? || return 1
 		_up
@@ -307,12 +319,18 @@ iproute2_pre_start()
 	# MTU support
 	local mtu=
 	eval mtu=\$mtu_${IFVAR}
-	[ -n "${mtu}" ] && ip link set dev "${IFACE}" mtu "${mtu}"
+	if [ -n "${mtu}" ]; then
+		veinfo ip link set dev "${IFACE}" mtu "${mtu}"
+		ip link set dev "${IFACE}" mtu "${mtu}"
+	fi
 
 	# TX Queue Length support
 	local len=
 	eval len=\$txqueuelen_${IFVAR}
-	[ -n "${len}" ] && ip link set dev "${IFACE}" txqueuelen "${len}"
+	if [ -n "${len}" ]; then
+		veinfo ip link set dev "${IFACE}" txqueuelen "${len}"
+		ip link set dev "${IFACE}" txqueuelen "${len}"
+	fi
 
 	local policyroute_order=
 	eval policyroute_order=\$policy_rules_before_routes_${IFVAR}
@@ -365,6 +383,7 @@ iproute2_post_stop()
 
 		# Only do something if the interface actually exist
 		if _exists; then
+			veinfo ip -4 route flush table cache dev "${IFACE}"
 			ip -4 route flush table cache dev "${IFACE}"
 		fi
 	fi
@@ -379,6 +398,7 @@ iproute2_post_stop()
 
 		# Only do something if the interface actually exist
 		if _exists; then
+			veinfo ip -6 route flush table cache dev "${IFACE}"
 			ip -6 route flush table cache dev "${IFACE}"
 		fi
 	fi
@@ -387,6 +407,7 @@ iproute2_post_stop()
 	if [ "${IFACE}" != "sit0" ]; then
 		if [ -n "$(ip tunnel show "${IFACE}" 2>/dev/null)" ]; then
 			ebegin "Destroying tunnel ${IFACE}"
+			veinfo ip tunnel del "${IFACE}"
 			ip tunnel del "${IFACE}"
 			eend $?
 		fi
