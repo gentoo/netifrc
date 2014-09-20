@@ -81,8 +81,11 @@ dhcpcd_stop()
 	eval opts=\$dhcp_${IFVAR}
 	[ -z "${opts}" ] && opts=${dhcp}
 	case " ${opts} " in
-		*" release "*) sig=SIGHUP;;
+		*" release "*) dhcpcd -k "${IFACE}" ;;
+		*)
+			start-stop-daemon --stop --quiet \
+				 --signal ${sig} --pidfile "${pidfile}"
+			;;
 	esac
-	start-stop-daemon --stop --quiet --signal ${sig} --pidfile "${pidfile}"
 	eend $?
 }
