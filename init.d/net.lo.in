@@ -203,7 +203,7 @@ _program_available()
 			/*) [ -x "${x}" ] && break;;
 			*) type "${x}" >/dev/null 2>&1 && break;;
 		esac
-		unset x
+		x=
 	done
 	[ -n "${x}" ] && echo $x && return 0
 	return 1
