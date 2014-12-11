@@ -4,7 +4,7 @@
 bonding_depend()
 {
 	before interface macchanger
-	program /sbin/ifconfig /bin/ifconfig
+	program ip /sbin/ifconfig /bin/ifconfig
 	# If you do not have sysfs, you MUST have this binary instead for ioctl
 	# Also you will loose some functionality that cannot be done via sysfs:
 	if [ ! -d /sys/class/net ]; then
@@ -124,7 +124,12 @@ bonding_pre_start()
 		unset oiface
 		eoutdent
 		# subsume (presumably kernel auto-)configured IP
-		ifconfig ${IFACE} ${addr} up
+		if [ -x "$(command -v ip)" ]; then
+			ip link set ${IFACE} up
+			ip address add ${addr} dev ${IFACE}
+		else
+			ifconfig ${IFACE} ${addr} up
+		fi
 	else
 		# warn if root on nfs and no subsume interface supplied
 		local root_fs_type=$(mountinfo -s /)
@@ -179,7 +184,11 @@ bonding_stop()
 
 	# Wipe subsumed interface
 	if [ -n "${subsume}" ]; then
-		ifconfig ${subsume} 0.0.0.0
+		if [ -x "$(command -v ip)" ]; then
+			ip address flush dev ${subsume}
+		else
+			ifconfig ${subsume} 0.0.0.0
+		fi
 	fi
 
 	local slaves= s=
