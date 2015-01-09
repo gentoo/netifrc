@@ -1,0 +1,23 @@
+name: Bond Test Suite
+description: Test to check the functioning of net.bond0
+net_config: conf.d/bond
+interface: $$BOND$$
+tests:
+  - name: Check Bond Interface
+    command: ifconfig $$BOND$$
+    keys:
+    - name: status
+      type: boolean
+      value: grep -q UP
+    - name: IP
+      value: "grep 'inet ' |  sed -e 's/^[ \t]*//' | cut -d ' ' -f2"
+      match: "r'\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b'"
+  - name: "Check /proc/net file"
+    command: "cat /proc/net/bonding/$$BOND$$"
+    keys:
+    - name: Slave $$BOND_IFACE_1$$ status
+      type: boolean
+      value: "grep -A 1 'Slave Interface: $$BOND_IFACE_1$$' | grep Status | grep -q -i up"
+    - name: Slave $$BOND_IFACE_2$$ status
+      type: boolean
+      value: "grep -A 1 'Slave Interface: $$BOND_IFACE_2$$' | grep Status | grep -q -i up"

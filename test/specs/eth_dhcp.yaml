@@ -1,0 +1,14 @@
+name: DHCP
+description: A battery of tests to check the correction functioning of static
+net_config: conf.d/eth_dhcp
+interface: $$WIRED$$
+tests:
+  - name: Check DHCP
+    command: ifconfig $$WIRED$$
+    keys:
+    - name: status
+      type: boolean
+      value: grep -q UP
+    - name: IP
+      value: "grep 'inet ' |  sed -e 's/^[ \t]*//' | cut -d ' ' -f2"
+      match: "r'\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b'"

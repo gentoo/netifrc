@@ -1,0 +1,3 @@
+vlans_$$VLAN_IFACE_1$$="1"
+config_$$VLAN_IFACE_1$$="null"
+config_$$VLAN_IFACE_1$$_1="192.168.2.1/24"

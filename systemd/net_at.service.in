@@ -1,0 +1,10 @@
+[Unit]
+Description="Gentoo Network Interface Management Scripts"
+
+[Service]
+ExecStart=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I start
+ExecStop=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

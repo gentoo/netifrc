@@ -1,0 +1,11 @@
+name: Vlan Test Suite
+description: Test to check the functioning of Virtual LAN
+net_config: conf.d/vlan
+interface: $$VLAN_IFACE_1$$
+tests:
+  - name: Check Bond Interface
+    command: ip -d link show $$VLAN_IFACE_1$$.1
+    keys:
+    - name: vlan status
+      type: boolean
+      value: grep -q vlan
