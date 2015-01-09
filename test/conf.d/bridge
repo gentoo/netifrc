@@ -1,0 +1,9 @@
+config_$$BRIDGE_IFACE_1$$="null"
+config_$$BRIDGE_IFACE_2$$="null"
+
+# bridge
+config_$$BRIDGE$$="dhcp"
+brctl_$$BRIDGE$$="setfd 0
+sethello 10
+stp off"
+bridge_$$BRIDGE$$="$$BRIDGE_IFACE_1$$ $$BRIDGE_IFACE_2$$"

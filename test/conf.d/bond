@@ -1,0 +1,9 @@
+# Bonded Interface Configuration
+#config_$$BOND_IFACE_1$$="null"
+#config_$$BOND_IFACE_2$$="null"
+
+slaves_$$BOND$$="$$BOND_IFACE_1$$ $$BOND_IFACE_2$$"
+config_$$BOND$$="null"
+# config_$$BOND$$="192.168.1.100"
+# routes_$$BOND$$="default via 192.168.1.1"
+rc_net_$$BOND$$_need="net.$$BOND_IFACE_1$$ net.$$BOND_IFACE_2$$"

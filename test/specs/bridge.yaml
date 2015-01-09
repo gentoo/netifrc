@@ -1,0 +1,11 @@
+name: Bridge Test Suite
+description: Test to check the functioning of Bridge
+net_config: conf.d/bridge
+interface: $$BRIDGE$$
+tests:
+  - name: Check Bridged Interfaces
+    command: brctl show
+    keys:
+    - name: Bridge $$BRIDGE$$ status
+      type: boolean
+      value: grep -q $$BRIDGE$$
