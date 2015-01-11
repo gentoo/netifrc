@@ -22,7 +22,7 @@ if [ -f "$SHDIR/functions.sh" ]; then
 	. "$SHDIR/functions.sh"
 else
 	echo "$SHDIR/functions.sh missing. Exiting"
-	exit -1
+	exit 1
 fi
 
 depend()

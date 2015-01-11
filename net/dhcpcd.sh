@@ -82,10 +82,7 @@ dhcpcd_stop()
 	[ -z "${opts}" ] && opts=${dhcp}
 	case " ${opts} " in
 		*" release "*) dhcpcd -k "${IFACE}" ;;
-		*)
-			start-stop-daemon --stop --quiet \
-				 --signal ${sig} --pidfile "${pidfile}"
-			;;
+		*) dhcpcd -x "${IFACE}" ;;
 	esac
 	eend $?
 }

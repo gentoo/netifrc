@@ -1,7 +1,10 @@
 [Unit]
-Description="Gentoo Network Interface Management Scripts"
+Description=Gentoo Network Interface Management Scripts
+After=sys-subsystem-net-devices-%i.device
+BindsTo=sys-subsystem-net-devices-%i.device
 
 [Service]
+Type=oneshot
 ExecStart=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I start
 ExecStop=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I stop
 RemainAfterExit=yes
