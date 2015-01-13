@@ -6,7 +6,6 @@ firewalld_depend()
 	after interface
 	before dhcp
 	program firewall-cmd
-	[ "$IFACE" != "lo" ] && need firewalld
 }
 
 _config_vars="$_config_vars firewalld_zone"
