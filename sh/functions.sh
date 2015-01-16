@@ -2,8 +2,7 @@
 # systems.
 
 # First check whether e* commands are present in the environment
-# XXX [[-n RC_GOT_FUNCTIONS]] ??
-if [ -n "$(command -v ebegin >/dev/null 2>&1)" ]; then
+if [ x$RC_GOT_FUNCTIONS = xyes -o -n "$(command -v ebegin 2>/dev/null)" ]; then
 	:
 
 # Then check for the presence of functions.sh
@@ -16,6 +15,8 @@ else
 fi
 
 # runscript functions
+# TODO: if another non-openrc system provides these in future, we have to
+# change this structure.
 if [ "$INIT" != "openrc" ]; then
 
 	# OpenRC functions used in depend
