@@ -16,7 +16,7 @@ else
 fi
 
 # runscript functions
-if [ -z "$(command -v service_set_value >/dev/null 2>&1)" ]; then
+if [ "$INIT" != "openrc" ]; then
 
 	# OpenRC functions used in depend
 	after() {
