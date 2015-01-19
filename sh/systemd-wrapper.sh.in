@@ -14,7 +14,7 @@ usage() {
 
 die() {
   echo "$@"
-  exit -1
+  exit 1
 }
 
 while getopts "i:" opt; do
@@ -49,8 +49,7 @@ fi
 if [ -f "$INITDIR/${RC_SVCPREFIX}.lo" ]; then
 	. "$INITDIR/${RC_SVCPREFIX}.lo"
 else
-	echo "$INITDIR/${RC_SVCPREFIX}.lo : Init file missing or invalid path"
-	exit -1
+	die "$INITDIR/${RC_SVCPREFIX}.lo : Init file missing or invalid path"
 fi
 
 netifrc_init() {
@@ -58,13 +57,13 @@ netifrc_init() {
 	mkdir -p "$OPTIONSDIR"
 	if [ ! -w "$OPTIONSDIR" ]; then
 		eerror "${OPTIONSDIR} does not exist or is not writeable"
-		exit -1;
+		exit 1
 	fi
 	# Ensure STATEDIR is present and writeable
 	mkdir -p "$STATEDIR"
 	if [ ! -w "$STATEDIR" ]; then
 		eerror "${STATEDIR} does not exist or is not writeable"
-		exit -1;
+		exit 1
 	fi
 }
 

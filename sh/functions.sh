@@ -11,7 +11,7 @@ elif [ -f /lib/gentoo/functions.sh ]; then
 
 else
 	echo "/lib/gentoo/functions.sh not found. Exiting"
-	exit -1
+	exit 1
 fi
 
 # runscript functions
@@ -120,7 +120,7 @@ get_interface() {
 			printf ${RC_IFACE};;
 		*)
 			eerror "Init system not supported. Aborting"
-			exit -1;;
+			exit 1;;
 	esac
 }
 

@@ -1,7 +1,8 @@
 [Unit]
-Description="Gentoo Network Interface Management Scripts"
+Description=Gentoo Network Interface Management Scripts
 
 [Service]
+Type=oneshot
 ExecStart=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I start
 ExecStop=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I stop
 RemainAfterExit=yes
