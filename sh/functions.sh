@@ -34,11 +34,14 @@ if [ "$INIT" != "openrc" ]; then
 	}
 
 	shell_var() {
-		local output=$1 sanitized_arg=
-		shift 1
+		local output= sanitized_arg=
 		for arg; do
 			sanitized_arg="${arg//[^a-zA-Z0-9_]/_}"
-			output="$output $arg"
+			if [ x"$output" = x"" ] ; then
+				output=$sanitized_arg
+			else
+				output="$output $sanitized_arg"
+			fi
 		done
 		echo "$output"
 	}
