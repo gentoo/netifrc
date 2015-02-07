@@ -30,9 +30,9 @@ depend()
 	local IFACE=$(get_interface)
 	local IFVAR=$(shell_var "${IFACE}")
 
-	need localmount
 	if [ "$RC_UNAME" = Linux -a "$IFACE" != lo ]; then
 		need sysfs
+		after modules
 	fi
 	after bootmisc
 	keyword -jail -prefix -vserver
@@ -41,6 +41,7 @@ depend()
 		lo|lo0) ;;
 		*)
 			after net.lo net.lo0 dbus
+			need localmount
 			provide net
 			;;
 	esac
