@@ -25,7 +25,7 @@ udhcpc_start()
 	# but it creates temporary files.
 	# We can move this stuff to udhcpc hook script to avoid that, should we do?
 	local conf="/var/run/udhcpc-${IFACE}.conf"
-	echo -n >"$conf"
+	>"$conf"
 	# Map some generic options to dhcpcd
 	for opt in ${opts}; do
 		case "${opt}" in

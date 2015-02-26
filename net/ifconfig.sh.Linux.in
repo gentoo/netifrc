@@ -81,7 +81,7 @@ _get_inet_address()
 	sed -n -e 's/.*\(inet addr:\|inet \)\([^ ]*\).*\(Mask:\|netmask \)\([^ ]*\).*/\2 \4/p')
 	[ -z "$1" ] && return 1
 
-	echo -n "$1"
+	printf '%s' "$1"
 	shift
 	echo "/$(_netmask2cidr "$1")"
 }
