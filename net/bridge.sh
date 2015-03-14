@@ -4,7 +4,7 @@
 bridge_depend()
 {
 	before interface macnet
-	program brctl
+	program ip brctl
 }
 
 _config_vars="$_config_vars bridge bridge_add brctl"
@@ -27,6 +27,83 @@ _bridge_ports()
 		n=${x##*/}
 		echo $n
 	done
+}
+
+_brctl()
+{
+	if [ -z "${_bridge_use_ip}" ]; then
+	       if ip -V >/dev/null 2>&1 && [ "$(ip -V | cut -c 24-29)" -ge 130430 ]; then
+			_bridge_use_ip=1
+		else
+			_bridge_use_ip=0
+		fi
+	fi
+	if [ "${_bridge_use_ip}" -eq 1 ]; then
+		case "$1" in
+			addbr)
+				ip link add "$2" type bridge
+				;;
+			delbr)
+				ip link del "$2"
+				;;
+			addif)
+				ip link set "$3" master "$2"
+				;;
+			delif)
+				ip link set "$3" nomaster
+				;;
+			setageing)
+				echo "$3" > /sys/class/net/"$2"/bridge/ageing_time
+				;;
+			setgcint)
+				# appears to have been dropped in Debian, and I don't see a sysfs file for it
+				eerror "brctl setgcint is not supported!"
+				return 1
+				;;
+			stp)
+				if [ "$3" = "on" -o "$3" = "yes" -o "$3" = "1" ]; then
+					_stp_state=1
+				elif [ "$3" = "off" -o "$3" = "no" -o "$3" = "0" ]; then
+					_stp_state=0
+				else
+					eerror "Invalid STP state for brctl stp!"
+					return 1
+				fi
+				echo ${_stp_state} > /sys/class/net/"$2"/bridge/stp_state
+				;;
+			setbridgeprio)
+				echo "$3" > /sys/class/net/"$2"/bridge/priority
+				;;
+			setfd)
+				echo "$3" > /sys/class/net/"$2"/bridge/forward_delay
+				;;
+			sethello)
+				echo "$3" > /sys/class/net/"$2"/bridge/hello_time
+				;;
+			setmaxage)
+				echo "$3" > /sys/class/net/"$2"/bridge/max_age
+				;;
+			setpathcost)
+				echo "$4" > /sys/class/net/"$2"/brif/"$3"/path_cost
+				;;
+			setportprio)
+				echo "$4" > /sys/class/net/"$2"/brif/"$3"/priority
+				;;
+			hairpin)
+				if [ "$4" -eq "on" -o "$4" -eq "yes" -o "$4" -eq "1" ]; then
+					_hairpin_mode=1
+				elif [ "$4" -eq "off" -o "$4" -eq "no" -o "$4" -eq "0" ]; then
+					_hairpin_mode=0
+				else
+					eerror "Invalid hairpin mode for brctl hairpin!"
+					return 1
+				fi
+				echo ${_hairpin_mode} > /sys/class/net/"$2"/brif/"$3"/hairpin_mode
+				;;
+		esac
+	else
+		brctl "$@"
+	fi
 }
 
 bridge_pre_start()
@@ -70,7 +147,7 @@ bridge_pre_start()
 
 	if ! _is_bridge ; then
 		ebegin "Creating bridge ${IFACE}"
-		if ! brctl addbr "${IFACE}"; then
+		if ! _brctl addbr "${IFACE}"; then
 			eend 1
 			return 1
 		fi
@@ -89,7 +166,7 @@ bridge_pre_start()
 		x=$1
 		shift
 		set -- "${x}" "${IFACE}" "$@"
-		brctl "$@"
+		_brctl "$@"
 	done
 	unset IFS
 
@@ -120,7 +197,7 @@ bridge_pre_start()
 			fi
 			# The interface is known to exist now
 			_up
-			if ! brctl addif "${BR_IFACE}" "${x}"; then
+			if ! _brctl addif "${BR_IFACE}" "${x}"; then
 				eend 1
 				return 1
 			fi
@@ -176,13 +253,13 @@ bridge_post_stop()
 		ebegin "Removing port ${port}${extra}"
 		local IFACE="${port}"
 		_set_flag -promisc
-		brctl delif "${iface}" "${port}"
+		_brctl delif "${iface}" "${port}"
 		eend $?
 	done
 
 	if ${delete}; then
 		eoutdent
-		brctl delbr "${iface}"
+		_brctl delbr "${iface}"
 		eend $?
 	fi
 
