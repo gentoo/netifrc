@@ -116,7 +116,7 @@ _flatten_array()
 
 _wait_for_carrier()
 {
-	local timeout= efunc=einfon
+	local timeout=
 
 	_has_carrier  && return 0
 
@@ -126,20 +126,19 @@ _wait_for_carrier()
 	# Incase users don't want this nice feature ...
 	[ ${timeout} -le 0 ] && return 0
 
-	yesno ${RC_PARALLEL} && efunc=einfo
-	${efunc} "Waiting for carrier (${timeout} seconds) "
+	einfon "Waiting for carrier (${timeout} seconds) "
 	while [ ${timeout} -gt 0 ]; do
 		if _has_carrier; then
-			[ "${efunc}" = "einfon" ] && echo
+			echo
 			eend 0
 			return 0
 		fi
 		sleep 1
 		: $(( timeout -= 1 ))
-		[ "${efunc}" = "einfon" ] && printf "."
+		printf "."
 	done
 
-	[ "${efunc}" = "einfon" ] && echo
+	echo
 	eend 1
 	return 1
 }

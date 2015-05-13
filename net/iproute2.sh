@@ -345,15 +345,17 @@ iproute2_pre_start()
 
 _iproute2_ipv6_tentative()
 {
-	LC_ALL=C ip addr show dev "${IFACE}" | \
-		grep -q "^[[:space:]]*inet6 .* tentative"
+	[ -n "$(LC_ALL=C ip -family inet6 addr show dev ${IFACE} tentative)" ] && return 0
+
+	return 1
 }
 
 iproute2_post_start()
 {
-	local n=
-	eval n=\$dad_timeout_${IFVAR}
-	[ -z "$n" ] && n=${dad_timeout:-10}
+	local _dad_timeout=
+
+	eval _dad_timeout=\$dad_timeout_${IFVAR}
+	_dad_timeout=${_dad_timeout:-${dad_timeout:-5}}
 
 	local policyroute_order=
 	eval policyroute_order=\$policy_rules_before_routes_${IFVAR}
@@ -361,14 +363,22 @@ iproute2_post_start()
 	yesno "$policyroute_order" || _iproute2_policy_routing
 
 	if _iproute2_ipv6_tentative; then
-		ebegin "Waiting for IPv6 addresses"
-		while [ $n -ge 0 ]; do
+		einfon "Waiting for IPv6 addresses (${_dad_timeout} seconds) "
+		while [ $_dad_timeout -gt 0 ]; do
 			_iproute2_ipv6_tentative || break
 			sleep 1
-			: $(( n -= 1 ))
+			: $(( _dad_timeout -= 1 ))
+			printf "."
 		done
-		[ $n -ge 0 ]
-		eend $?
+
+		echo ""
+
+		if [ $_dad_timeout -le 0 ]; then
+			eend 1
+			return 1
+		else
+			eend 0
+		fi
 	fi
 
 	return 0
