@@ -919,9 +919,9 @@
 # You can also configure the bridge or bridge members via sysfs on 2.6 kernels
 # or newer. See the kernel bridge documentation for a description of these
 # options.
-#stp_state_br0="0"
-#forward_delay_br0="10"
-#hairpin_mode_eth0="1"
+#bridge_stp_state_br0="0"
+#bridge_forward_delay_br0="10"
+#brport_hairpin_mode_eth0="1"
 
 #-----------------------------------------------------------------------------
 # RFC 2684 Bridge Support

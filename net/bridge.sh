@@ -125,12 +125,15 @@ bridge_pre_start()
 	for x in /sys/class/net/"${IFACE}"/bridge/*; do
 		[ -f "${x}" ] || continue
 		n=${x##*/}
-		eval s=\$${n}_${IFVAR}
-		if [ -n "${s}" ]; then
-			einfo "Setting ${n}: ${s}"
-			echo "${s}" >"${x}" || \
-			eerror "Failed to configure $n (${n}_${IFVAR})"
-		fi
+		# keep no prefix for backward compatibility
+		for prefix in "" bridge_; do
+			eval s=\$${prefix}${n}_${IFVAR}
+			if [ -n "${s}" ]; then
+				einfo "Setting ${n}: ${s}"
+				echo "${s}" >"${x}" || \
+				eerror "Failed to configure $n (${n}_${IFVAR})"
+			fi
+		done
 	done
 
 	if [ -n "${ports}" ]; then
@@ -161,12 +164,14 @@ bridge_pre_start()
 			for x in /sys/class/net/"${IFACE}"/brport/*; do
 				[ -f "${x}" ] || continue
 				n=${x##*/}
-				eval s=\$${n}_${IFVAR}
-				if [ -n "${s}" ]; then
-					einfo "Setting ${n}@${IFACE}: ${s}"
-					echo "${s}" >"${x}" || \
-					eerror "Failed to configure $n (${n}_${IFVAR})"
-				fi
+				for prefix in "" brport_; do
+					eval s=\$${prefix}${n}_${IFVAR}
+					if [ -n "${s}" ]; then
+						einfo "Setting ${n}@${IFACE}: ${s}"
+						echo "${s}" >"${x}" || \
+						eerror "Failed to configure $n (${n}_${IFVAR})"
+					fi
+				done
 			done
 			eend 0
 		done
