@@ -82,16 +82,20 @@ bridge_pre_start()
 	# Old configuration set mechanism
 	# Only a very limited subset of the options are available in the old
 	# configuration method. The sysfs interface is in the next block instead.
-	local IFS="$__IFS"
-	for x in ${opts}; do
+	if [ -n "${opts}" ]; then
+		ewarn "brctl options are deprecated please migrate to sysfs options"
+		ewarn "map of important options is available at https://wiki.gentoo.org/wiki/Netifrc/Brctl_Migration"
+		local IFS="$__IFS"
+		for x in ${opts}; do
+			unset IFS
+			set -- ${x}
+			x=$1
+			shift
+			set -- "${x}" "${IFACE}" "$@"
+			brctl "$@"
+		done
 		unset IFS
-		set -- ${x}
-		x=$1
-		shift
-		set -- "${x}" "${IFACE}" "$@"
-		brctl "$@"
-	done
-	unset IFS
+	fi
 
 	# New configuration set mechanism, matches bonding
 	for x in /sys/class/net/"${IFACE}"/bridge/*; do

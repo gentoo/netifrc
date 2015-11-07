@@ -910,6 +910,7 @@
 
 # Below is an example of configuring the bridge
 # Consult "man brctl" for more details
+# This method is deprecated in favour of the sysfs interface.
 #brctl_br0="setfd 15
 #sethello 2
 #stp on"
