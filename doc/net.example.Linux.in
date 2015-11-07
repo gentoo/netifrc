@@ -893,6 +893,7 @@
 # ports to it you must set at least one of the following variables based on the
 # interface name, so that we can pick it up from your configuration. Even an
 # empty value variable is fine, but at least one of them must be set:
+# bridge_force_IFVAR
 # brctl_IFVAR
 
 # You need to configure the ports to null values so dhcp does not get started

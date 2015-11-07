@@ -4,7 +4,7 @@
 bridge_depend()
 {
 	before interface macnet
-	program brctl
+	program brctl ip
 }
 
 _config_vars="$_config_vars bridge bridge_add brctl"
@@ -35,17 +35,27 @@ bridge_pre_start()
 	# ports is for static add
 	local ports="$(_get_array "bridge_${IFVAR}")"
 	# old config options
-	local opts="$(_get_array "brctl_${IFVAR}")"
+	local brctl_opts="$(_get_array "brctl_${IFVAR}")"
 	# brif is used for dynamic add
 	eval brif=\$bridge_add_${IFVAR}
+
+	local do_iproute2=false do_brctl=false
+	if [ -n "${brctl_opts}" ] && type brctl >/dev/null 2>&1; then
+		do_brctl=true
+	elif type ip >/dev/null 2>&1; then
+		do_iproute2=true
+	elif type brctl >/dev/null 2>&1; then
+		do_brctl=true
+	fi
 
 	# we need a way to if the bridge exists in a variable name, not just the
 	# contents of a variable. Eg if somebody has only bridge_add_eth0='br0',
 	# with no other lines mentioning br0.
 	eval bridge_unset=\${bridge_${IFVAR}-y\}
 	eval brctl_unset=\${brctl_${IFVAR}-y\}
+	eval bridge_force_unset=\${bridge_force_${IFVAR}-y\}
 
-	if [ -z "${brif}" -a "${brctl_unset}" = 'y' ]; then
+	if [ -z "${brif}" -a "${brctl_unset}${bridge_force_unset}" = 'yy' ]; then
 		if [ -z "${ports}" -a "${bridge_unset}" = "y" ]; then
 			#eerror "Misconfigured static bridge detected (see net.example)"
 			return 0
@@ -70,7 +80,18 @@ bridge_pre_start()
 
 	if ! _is_bridge ; then
 		ebegin "Creating bridge ${IFACE}"
-		if ! brctl addbr "${IFACE}"; then
+		if ${do_iproute2}; then
+			ip link add "${IFACE}" type bridge
+			rc=$?
+		elif ${do_brctl}; then
+			brctl addbr "${IFACE}"
+			rc=$?
+		else
+			eerror "Neither iproute2 nor brctl has been found, please install"
+			eerror "either \"iproute2\" or \"brctl\"."
+			rc=1
+		fi
+		if [ ${rc} != 0 ]; then
 			eend 1
 			return 1
 		fi
@@ -82,19 +103,22 @@ bridge_pre_start()
 	# Old configuration set mechanism
 	# Only a very limited subset of the options are available in the old
 	# configuration method. The sysfs interface is in the next block instead.
-	if [ -n "${opts}" ]; then
-		ewarn "brctl options are deprecated please migrate to sysfs options"
-		ewarn "map of important options is available at https://wiki.gentoo.org/wiki/Netifrc/Brctl_Migration"
-		local IFS="$__IFS"
-		for x in ${opts}; do
+	if ${do_brctl}; then
+		if [ -n "${brctl_opts}" ]; then
+			ewarn "brctl options are deprecated please migrate to sysfs options"
+			ewarn "map of important options is available at https://wiki.gentoo.org/wiki/Netifrc/Brctl_Migration"
+
+			local IFS="$__IFS"
+			for x in ${brctl_opts}; do
+				unset IFS
+				set -- ${x}
+				x=$1
+				shift
+				set -- "${x}" "${IFACE}" "$@"
+				brctl "$@"
+			done
 			unset IFS
-			set -- ${x}
-			x=$1
-			shift
-			set -- "${x}" "${IFACE}" "$@"
-			brctl "$@"
-		done
-		unset IFS
+		fi
 	fi
 
 	# New configuration set mechanism, matches bonding
@@ -124,7 +148,12 @@ bridge_pre_start()
 			fi
 			# The interface is known to exist now
 			_up
-			if ! brctl addif "${BR_IFACE}" "${x}"; then
+			if ${do_iproute2}; then
+				ip link set "${x}" master "${BR_IFACE}"
+			elif ${do_brctl}; then
+				brctl addif "${BR_IFACE}" "${x}"
+			fi
+			if [ $? != 0 ]; then
 				eend 1
 				return 1
 			fi
@@ -180,13 +209,21 @@ bridge_post_stop()
 		ebegin "Removing port ${port}${extra}"
 		local IFACE="${port}"
 		_set_flag -promisc
-		brctl delif "${iface}" "${port}"
+		if type ip > /dev/null 2>&1; then
+			ip link set "${port}" nomaster
+		else
+			brctl delif "${iface}" "${port}"
+		fi
 		eend $?
 	done
 
 	if ${delete}; then
 		eoutdent
-		brctl delbr "${iface}"
+		if type ip > /dev/null 2>&1; then
+			ip link del "${iface}"
+		else
+			brctl delbr "${iface}"
+		fi
 		eend $?
 	fi
 
