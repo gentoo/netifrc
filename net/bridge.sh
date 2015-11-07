@@ -129,6 +129,7 @@ bridge_pre_start()
 		for prefix in "" bridge_; do
 			eval s=\$${prefix}${n}_${IFVAR}
 			if [ -n "${s}" ]; then
+				[ -z "${prefix}" ] && ewarn "sysfs key '${n}_${IFVAR}' should be prefixed, please add bridge_ prefix."
 				einfo "Setting ${n}: ${s}"
 				echo "${s}" >"${x}" || \
 				eerror "Failed to configure $n (${n}_${IFVAR})"
@@ -167,6 +168,7 @@ bridge_pre_start()
 				for prefix in "" brport_; do
 					eval s=\$${prefix}${n}_${IFVAR}
 					if [ -n "${s}" ]; then
+						[ -z "${prefix}" ] && ewarn "sysfs key '${n}_${IFVAR}' should be prefixed, please add brport_ prefix."
 						einfo "Setting ${n}@${IFACE}: ${s}"
 						echo "${s}" >"${x}" || \
 						eerror "Failed to configure $n (${n}_${IFVAR})"
