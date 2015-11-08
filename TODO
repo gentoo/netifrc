@@ -11,4 +11,23 @@
 	- rem vlan1 - _ifindex (eth0=0,vlan2=1)
 	- add vlan3 - _ifindex (eth0=0,vlan2=1,vlan3=2)
 	Now your routing table has entries for both vlan2 and vlan3 with a metric of 2.
+- Support many more device types easily:
+  - Dummy: ip link add dev dummy1 type dummy
+  - HSR: ip link add name hsr0 type hsr slave1 dummy3 slave2 dummy4
+  - VXLAN: ip link add link dummy2 name vxlan199 type vxlan id 199 dev dummy2 group 224.2.0.199 dstport 4789
+  - IPVLAN: ...
+  - IFB: ip link add ifb0 type ifb 
+  - CAN:
+  - VCAN:
+  - ip6tnl:
+  - gre,gretap:
+  - ip6gre,ip6gretap:
+  - vti:
+  - nlmon: ip link add nlmon0 type nlmon
+  - ipvlan: ...
+  - lowpan:
+  - macvtap:
+  - ipoib: ..
+  - geneve: ip link add gen0 type geneve id 0 remote 192.168.53.53
+
 
