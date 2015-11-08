@@ -536,6 +536,18 @@ interface_down()
 {
 	_run_if _down "$@"
 }
+set_interface_type()
+{
+	service_set_value iface_type "$@"
+}
+get_interface_type()
+{
+	( RC_SVCNAME="net.$IFACE" service_get_value iface_type )
+}
+is_interface_type()
+{
+	[ "$(get_interface_type)" = "$1" ]
+}
 
 start()
 {
