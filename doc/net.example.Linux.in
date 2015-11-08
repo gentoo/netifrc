@@ -150,6 +150,15 @@
 
 ##############################################################################
 # OPTIONAL MODULES
+#-----------------------------------------------------------------------------
+# IPROUTE2 INTERFACE TYPES
+# The type_$iface variable maps to the link type parameter in iproute2.
+# If you need to use additional interface types, you should try to use that
+# parameter. Supported interface types are listed below. Please note that some
+# interface types may mandate a specific naming scheme.
+#
+# Dummy network interface:
+#type_dummy0=dummy
 
 #-----------------------------------------------------------------------------
 # WIRELESS (802.11 support)
