@@ -893,6 +893,7 @@
 # ports to it you must set at least one of the following variables based on the
 # interface name, so that we can pick it up from your configuration. Even an
 # empty value variable is fine, but at least one of them must be set:
+# bridge_force_IFVAR
 # brctl_IFVAR
 
 # You need to configure the ports to null values so dhcp does not get started
@@ -910,6 +911,7 @@
 
 # Below is an example of configuring the bridge
 # Consult "man brctl" for more details
+# This method is deprecated in favour of the sysfs interface.
 #brctl_br0="setfd 15
 #sethello 2
 #stp on"
@@ -917,9 +919,9 @@
 # You can also configure the bridge or bridge members via sysfs on 2.6 kernels
 # or newer. See the kernel bridge documentation for a description of these
 # options.
-#stp_state_br0="0"
-#forward_delay_br0="10"
-#hairpin_mode_eth0="1"
+#bridge_stp_state_br0="0"
+#bridge_forward_delay_br0="10"
+#brport_hairpin_mode_eth0="1"
 
 #-----------------------------------------------------------------------------
 # RFC 2684 Bridge Support
