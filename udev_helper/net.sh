@@ -10,6 +10,11 @@ ACTION=$2
 
 SCRIPT=/etc/init.d/net.$IFACE
 
+# make sure openrc is managing services
+if [ ! -d /run/openrc ]; then
+	exit 0
+fi
+
 # ignore interfaces that are registered after being "up" (?)
 case ${IFACE} in
 	ppp*|ippp*|isdn*|plip*|lo*|irda*|dummy*|ipsec*|tun*|tap*|br*)
