@@ -3,7 +3,7 @@
 
 arping_depend()
 {
-	program /sbin/arping /bin/arping /usr/sbin/arping2
+	program /sbin/arping /bin/arping /usr/sbin/arping
 	before interface
 }
 
@@ -25,23 +25,16 @@ arping_address()
 	eval w=\$arping_wait_${IFVAR}
 	[ -z "${w}" ] && w=${arping_wait:-5}
 
-	if type arping2 >/dev/null 2>&1; then
-		if [ -n "${spoof}" ]; then
-			opts="${opts} -S ${spoof}"
-		else
-			[ -z "$(_get_inet_address)" ] && opts="${opts} -0"
-		fi
-		while [ ${w} -gt 0 -a -z "${foundmac}" ]; do
-			foundmac="$(arping2 ${opts} -r -c 1 -i "${IFACE}" "${ip}" 2>/dev/null | \
-			sed -e 'y/abcdef/ABCDEF/')"
-			: $(( w -= 1 ))
-		done
+	if [ -n "${spoof}" ]; then
+		opts="${opts} -S ${spoof}"
 	else
-		[ -z "$(_get_inet_address)" ] && opts="${opts} -D"
-
-		foundmac="$(arping -w "${w}" ${opts} -f -I "${IFACE}" "${ip}" 2>/dev/null | \
-			sed -n -e 'y/abcdef/ABCDEF/' -e 's/[^[]*\[\([^]]*\)\].*/\1/p')"
+		[ -z "$(_get_inet_address)" ] && opts="${opts} -0"
 	fi
+	while [ ${w} -gt 0 -a -z "${foundmac}" ]; do
+		foundmac="$(arping ${opts} -r -c 1 -i "${IFACE}" "${ip}" 2>/dev/null | \
+		sed -e 'y/abcdef/ABCDEF/')"
+		: $(( w -= 1 ))
+	done
 	[ -z "${foundmac}" ] && return 1
 
 	if [ -n "${mac}" ]; then
