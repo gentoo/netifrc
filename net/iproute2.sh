@@ -318,32 +318,6 @@ iproute2_pre_start()
 		eend $? || return 1
 		_up
 	fi
-	
-	# L2TPv3
-	local l2tpsession=
-	eval l2tpsession=\$l2tpsession_${IFVAR}
-	if [ -n "${l2tpsession}" ]; then
-		ebegin "Creating L2TPv3 tunnel ${IFVAR}"
-		local l2tptunnel=
-		eval l2tptunnel=\$l2tptunnel_${IFVAR}
-		if [ -n "${l2tptunnel}" ]; then
-			local retcode
-			veinfo ip l2tp add tunnel ${l2tptunnel}
-			ip l2tp add tunnel ${l2tptunnel}
-			#a L2TPv3 tunnel can host several sessions (1 session <=> 1 interface)
-			#if $?=2 the tunnel id already exists, just ignore this error
-			#we assume that the existing one have the same property that we want to create...
-			if [ $? -ne 0 ] && [ $? -ne 2 ]; then
-				eend $? || return 1
-			fi
-		fi
-		veinfo ip l2tp add session ${l2tpsession} name "${IFACE}"
-		ip l2tp add session ${l2tpsession} name "${IFACE}"
-		if [ $? -ne 0 ] && [ $? -ne 2 ]; then
-			eend $? || return 1
-		fi
-		_up
-	fi
 
 	# MTU support
 	local mtu=
@@ -448,25 +422,6 @@ iproute2_post_stop()
 			ebegin "Destroying tunnel ${IFACE}"
 			veinfo ip tunnel del "${IFACE}"
 			ip tunnel del "${IFACE}"
-			eend $?
-		fi
-		local l2tptuple
-		# Searching for l2tp session associated to ${IFACE}
-		l2tptuple="$(ip l2tp show session | \
-			awk "match(\$0, /^Session ([0-9]+) in tunnel ([0-9]+)\$/, ret) {sid=ret[1]; tid=ret[2]} 
-				match(\$0, /^[ ]*interface name: ${IFACE}\$/) {print sid\":\"tid; exit}")"
-		if [ -n "$l2tptuple" ]; then
-			local l2tpsession_id l2tptunnel_id
-			l2tpsession_id=${l2tptuple%:*}
-			l2tptunnel_id=${l2tptuple#*:}
-			ebegin "Destroying L2TPv3 tunnel ${IFACE}"
-			veinfo ip l2tp del session tunnel_id $l2tptunnel_id session_id $l2tpsession_id
-			ip l2tp del session tunnel_id $l2tptunnel_id session_id $l2tpsession_id
-			if [ -z "$(ip l2tp show session | grep -E "^Session [0-9]+ in tunnel $l2tptunnel_id\$")" ]; then
-				#tunnel $l2tptunnel_id no longer used, destoying it...
-				veinfo ip l2tp del tunnel tunnel_id $l2tptunnel_id
-				ip l2tp del tunnel tunnel_id $l2tptunnel_id
-			fi
 			eend $?
 		fi
 	fi
