@@ -100,7 +100,7 @@ l2tp_pre_start()
 	eval l2tpsession=\$l2tpsession_${IFVAR}
 	test -n "${l2tpsession}" || return 0
 	
-	ebegin "Creating L2TP tunnel ${IFVAR}"
+	ebegin "Creating L2TPv3 link ${IFVAR}"
 	local l2tp_err s_name s_tunnel_id s_session_id s_peer_session_id s_cookie s_peer_cookie s_offset s_peer_offset s_l2spec_type
 	if ! _l2tp_eval_props s_ "name|tunnel_id|session_id|peer_session_id|cookie|peer_cookie|offset|peer_offset|l2spec_type" "${l2tpsession}"; then
 		eend 1 "l2tpsession_${IFVAR} syntax error: $l2tp_err"
@@ -157,7 +157,7 @@ l2tp_post_stop()
 	local session_id tunnel_id
 	_is_l2tp || return 0
 	
-	ebegin "Destroying L2TP tunnel ${IFACE}"
+	ebegin "Destroying L2TPv3 link ${IFACE}"
 	veinfo ip l2tp del session tunnel_id $tunnel_id session_id $session_id
 	ip l2tp del session tunnel_id $tunnel_id session_id $session_id
 	if ! ip l2tp show session | grep -Eq "^Session [0-9]+ in tunnel $tunnel_id\$"; then
