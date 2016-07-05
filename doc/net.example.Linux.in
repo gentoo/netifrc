@@ -985,6 +985,30 @@
 #relay_6to4="192.168.3.2"
 #suffix_6to4=":ff"
 
+# For L2TP (v3) link
+# WARNING: sys-apps/iproute2 is required to use this module
+# You may have to add "l2tp" to modules list
+#
+# A L2 link between need a session within a tunnel
+# 1 session <=> 1 interface and 1 tunnel <=> n session(s)
+# a tunnel can host several session (shared by several interfaces)
+# 
+# Example to create 3 L2TPv3 links where (see man ip, iproute2 manual for more details):
+# * l2tpeth0 and l2tpeth1 are tho sessions into a same (shared) tunnel (encap IP)
+# * l2tpeth2 is a session into an separate tunnel (encap UDP)
+#
+#l2tptunnel_l2tpeth0="remote 1.2.3.4 local 1.2.4.3 encap ip tunnel_id 1 peer_tunnel_id 1"
+#l2tpsession_l2tpeth0="tunnel_id 1 session_id 1 peer_session_id 1"
+#config_l2tpeth="10.100.0.1/24"
+#
+#l2tptunnel_l2tpeth1="remote 1.2.3.4 local 1.2.4.3 encap ip tunnel_id 1 peer_tunnel_id 1"
+#l2tpsession_l2tpeth1="tunnel_id 1 session_id 2 peer_session_id 2"
+#config_l2tpeth1="10.100.1.1/24"
+#
+#l2tptunnel_l2tpeth2="remote 1.2.3.4 local 1.2.4.3 encap udp tunnel_id 2 peer_tunnel_id 2 udp_sport 5000 udp_dport 6000"
+#l2tpsession_l2tpeth2="tunnel_id 2 session_id 1 peer_session_id 1"
+#config_l2tpeth2="10.100.2.1/24"
+
 #-----------------------------------------------------------------------------
 # Advanced Routing
 # WARNING: For advanced routing you MUST be using sys-apps/iproute2
