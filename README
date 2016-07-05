@@ -21,7 +21,10 @@ time, at least as far back as September 2001 (that was the rc-scripts-1.1.5
 release).
 
 If you're interested in who contributed to this, please see the extensive
-CREDITS file.
+CREDITS file, as well as checking the top of relevant files.
+
+Netifrc is presently licensed under the 2-clause BSD license, after a switch
+in early 2005.
 
 Reporting Bugs
 --------------
