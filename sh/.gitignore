@@ -1,3 +1,4 @@
 ifwatchd-carrier.sh
 ifwatchd-nocarrier.sh
+systemd-wrapper.sh
 udhcpc-hook.sh
