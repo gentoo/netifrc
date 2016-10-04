@@ -6,7 +6,7 @@
 SHDIR="@LIBEXECDIR@/sh"
 MODULESDIR="@LIBEXECDIR@/net"
 MODULESLIST="${RC_SVCDIR}/nettree"
-_config_vars="config routes"
+_config_vars="config metric routes"
 
 [ -z "${IN_BACKGROUND}" ] && IN_BACKGROUND="NO"
 
