@@ -129,8 +129,13 @@ _add_address()
 					pr*) x=preferred_lft ;;
 				esac
 				eval "$x=$1" ; shift ;;
-			home|nodad|h*|no*)
-				case $x in h*) x=home ;; n*) x=nodad ;; esac
+			home|mngtmpaddr|nodad|noprefixroute|h*|mng*|no*)
+				case $x in
+					h*) x=home ;;
+					m*) x=mngtmpaddr ;;
+					nop*) x=noprefixroute ;;
+					n*) x=nodad ;;
+				esac
 				# FIXME: If we need to reorder these, this will take more code
 				confflaglist="${confflaglist} $x" ; ;;
 			*)
