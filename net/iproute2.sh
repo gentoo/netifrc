@@ -203,7 +203,7 @@ _add_address()
 			$msgfunc "Address ${address}${netmask:+/}${netmask} already existed: $(ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)"
 			[ $abort -eq 1 ] && rc=1
 		else
-			# TODO: Handle other errors
+			: # TODO: Handle other errors
 		fi
 	fi
 	return $rc
@@ -275,7 +275,7 @@ _add_route()
 			$msgfunc "Route '$cmd' already existed: $(ip $family route show $cmd dev "${IFACE}" 2>&1)"
 			[ $abort -eq 1 ] && rc=1
 		else
-			# TODO: Handle other errors
+			: # TODO: Handle other errors
 		fi
 	fi
 	eend $rc
