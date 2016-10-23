@@ -227,6 +227,34 @@ _show_address()
 	einfo "received address $(_get_inet_address "${IFACE}")"
 }
 
+# Allow custom error handling behavior to be set by the user.
+# Known used combinations, with defaults
+# errh_IFVAR_address_EEXIST=warn
+# errh_IFVAR_route_EEXIST=warn
+_get_errorhandler_behavior() {
+	IFVAR="$1"
+	object="$2"
+	error="$3"
+	fallback="$4"
+	value=
+	for key in \
+		"errh_${IFVAR}_${object}_${error}" \
+		"errh_${IFVAR}_${object}_DEFAULT" \
+		"errh_${IFVAR}_DEFAULT_${error}" \
+		"errh_${IFVAR}_DEFAULT_DEFAULT" \
+		"errh_DEFAULT_${object}_${error}" \
+		"errh_DEFAULT_${object}_DEFAULT" \
+		"errh_DEFAULT_DEFAULT_${error}" \
+		"errh_DEFAULT_DEFAULT_DEFAULT" \
+		"errh" \
+		"fallback" ; do
+		eval value="\${key}"
+		if [ -n "$value" ]; then
+			echo "$value" && break
+		fi
+	done
+}
+
 # Basically sorts our modules into order and saves the list
 _gen_module_list()
 {
