@@ -177,12 +177,35 @@ _add_address()
 	# Always have a netmask
 	[ -z "$netmask" ] && netmask=$family_maxnetmask
 
+	# Check for address already existing:
+	ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>/dev/null | \
+		fgrep -sq "${address}"
+	address_already_exists=$?
+
 	# This must appear on a single line, continuations cannot be used
 	set -- "${address}${netmask:+/}${netmask}" ${peer:+peer} ${peer} ${broadcast:+broadcast} ${broadcast} ${anycast:+anycast} ${anycast} ${label:+label} ${label} ${scope:+scope} ${scope} dev "${IFACE}" ${valid_lft:+valid_lft} $valid_lft ${preferred_lft:+preferred_lft} $preferred_lft $confflaglist
 	veinfo ip addr add "$@"
 	ip addr add "$@"
 	rc=$?
-	# TODO: check return code in some cases
+	# Check return code in some cases
+	if [ $rc -ne 0 ]; then
+		# If the address already exists, our default behavior is to WARN but continue.
+		# You can completely silence this with: errh_IFVAR_address_EEXIST=continue
+		if [ $address_already_exists -eq 0 ]; then
+			eh_behavior=$(_get_errorhandler_behavior "$IFVAR" "address" "EEXIST" "warn")
+			abort=0
+			case $eh_behavior in
+				continue) msgfunc=true ;;
+				info) msgfunc=einfo ;;
+				warn) msgfunc=ewarn ;;
+				error|fatal) msgfunc=eerror abort=1;;
+			esac
+			$msgfunc "Address ${address}${netmask:+/}${netmask} already existed: $(ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)"
+			[ $abort -eq 1 ] && rc=1
+		else
+			# TODO: Handle other errors
+		fi
+	fi
 	return $rc
 }
 
