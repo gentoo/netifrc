@@ -251,10 +251,33 @@ _add_route()
 		cmd="${cmd} metric ${metric}"
 	fi
 
+	# Check for route already existing:
+	ip ${family} route show ${cmd} dev "${IFACE}" 2>/dev/null | \
+		fgrep -sq "${cmd%% *}"
+	route_already_exists=$?
+
 	veinfo ip ${family} route append ${cmd} dev "${IFACE}"
 	ip ${family} route append ${cmd} dev "${IFACE}"
 	rc=$?
-	# TODO: check return code in some cases
+	# Check return code in some cases
+	if [ $rc -ne 0 ]; then
+		# If the route already exists, our default behavior is to WARN but continue.
+		# You can completely silence this with: errh_IFVAR_route_EEXIST=continue
+		if [ $route_already_exists -eq 0 ]; then
+			eh_behavior=$(_get_errorhandler_behavior "$IFVAR" "route" "EEXIST" "warn")
+			abort=0
+			case $eh_behavior in
+				continue) msgfunc=true ;;
+				info) msgfunc=einfo ;;
+				warn) msgfunc=ewarn ;;
+				error|fatal) msgfunc=eerror abort=1;;
+			esac
+			$msgfunc "Route '$cmd' already existed: $(ip $family route show $cmd dev "${IFACE}" 2>&1)"
+			[ $abort -eq 1 ] && rc=1
+		else
+			# TODO: Handle other errors
+		fi
+	fi
 	eend $rc
 }
 
