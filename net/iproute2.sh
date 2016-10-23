@@ -166,6 +166,9 @@ _add_address()
 	set -- "${address}${netmask}" ${peer:+peer} ${peer} ${broadcast:+broadcast} ${broadcast} ${anycast:+anycast} ${anycast} ${label:+label} ${label} ${scope:+scope} ${scope} dev "${IFACE}" ${valid_lft:+valid_lft} $valid_lft ${preferred_lft:+preferred_lft} $preferred_lft $confflaglist
 	veinfo ip addr add "$@"
 	ip addr add "$@"
+	rc=$?
+	# TODO: check return code in some cases
+	return $rc
 }
 
 _add_route()
@@ -212,7 +215,9 @@ _add_route()
 
 	veinfo ip ${family} route append ${cmd} dev "${IFACE}"
 	ip ${family} route append ${cmd} dev "${IFACE}"
-	eend $?
+	rc=$?
+	# TODO: check return code in some cases
+	eend $rc
 }
 
 _delete_addresses()
@@ -237,6 +242,9 @@ _tunnel()
 {
 	veinfo ip tunnel "$@"
 	ip tunnel "$@"
+	rc=$?
+	# TODO: check return code in some cases
+	return $rc
 }
 
 # This is just to trim whitespace, do not add any quoting!
