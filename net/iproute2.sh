@@ -109,17 +109,31 @@ _add_address()
 	local x
 	local address netmask broadcast peer anycast label scope
 	local valid_lft preferred_lft home nodad
-	local confflaglist
-	address="$1" ; shift
+	local confflaglist family raw_address family_maxnetmask
+	raw_address="$1" ; shift
+	# Extract the netmask on address if present.
+	if [ "${address%\/*}" != "${address}" ]; then
+		address="${raw_address%\/*}"
+		netmask="${raw_address#*\/}"
+	else
+		address="$raw_address"
+	fi
+
+	# Some options are not valid for one family or the other.
+	case ${address} in
+		*:*) family=6 family_maxnetmask=128 ;;
+		*) family=4 family_maxnetmask=32 ;;
+	esac
+
 	while [ -n "$*" ]; do
 		x=$1 ; shift
 		case "$x" in
 			netmask|ne*)
-				netmask="/$(_netmask2cidr "$1")"
-				if [ "${address/\/}" != "${address}" ]; then
-					eerror "Too many netmasks: $address netmask $1"
+				if [ -n "${netmask}" ]; then
+					eerror "Too many netmasks: $raw_address netmask $1"
 					return 1
 				fi
+				netmask="/$(_netmask2cidr "$1")"
 				shift ;;
 			broadcast|brd|br*)
 				broadcast="$1" ; shift ;;
@@ -155,15 +169,16 @@ _add_address()
 
 	# figure out the broadcast address if it is not specified
 	# This must NOT be set for IPv6 addresses
-	if [ "${address#*:}" = "${address}" ]; then
-		[ -z "$broadcast" ] && broadcast="+"
-	elif [ -n "$broadcast" ]; then
-		eerror "Broadcast keywords are not valid with IPv6 addresses"
-		return 1
-	fi
+	case $family in
+		4) [ -z "$broadcast" ] && broadcast="+" ;;
+		6) [ -n "$broadcast" ] && eerror "Broadcast keywords are not valid with IPv6 addresses" && return 1 ;;
+	esac
+
+	# Always have a netmask
+	[ -z "$netmask" ] && netmask=$family_maxnetmask
 
 	# This must appear on a single line, continuations cannot be used
-	set -- "${address}${netmask}" ${peer:+peer} ${peer} ${broadcast:+broadcast} ${broadcast} ${anycast:+anycast} ${anycast} ${label:+label} ${label} ${scope:+scope} ${scope} dev "${IFACE}" ${valid_lft:+valid_lft} $valid_lft ${preferred_lft:+preferred_lft} $preferred_lft $confflaglist
+	set -- "${address}${netmask:+/}${netmask}" ${peer:+peer} ${peer} ${broadcast:+broadcast} ${broadcast} ${anycast:+anycast} ${anycast} ${label:+label} ${label} ${scope:+scope} ${scope} dev "${IFACE}" ${valid_lft:+valid_lft} $valid_lft ${preferred_lft:+preferred_lft} $preferred_lft $confflaglist
 	veinfo ip addr add "$@"
 	ip addr add "$@"
 	rc=$?
