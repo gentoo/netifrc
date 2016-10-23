@@ -115,7 +115,12 @@ _add_address()
 		x=$1 ; shift
 		case "$x" in
 			netmask|ne*)
-				netmask="/$(_netmask2cidr "$1")" ; shift ;;
+				netmask="/$(_netmask2cidr "$1")"
+				if [ "${address/\/}" != "${address}" ]; then
+					eerror "Too many netmasks: $address netmask $1"
+					return 1
+				fi
+				shift ;;
 			broadcast|brd|br*)
 				broadcast="$1" ; shift ;;
 			pointopoint|pointtopoint|peer|po*|pe*)
