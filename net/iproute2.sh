@@ -235,7 +235,7 @@ _add_route()
 	local cmd= have_metric=false
 	while [ -n "$1" ]; do
 		case "$1" in
-			metric) cmd="${cmd} $1"; have_metric=true;;
+			metric) cmd="${cmd} metric $2"; shift ; have_metric=true;;
 			netmask) cmd="${cmd}/$(_netmask2cidr "$2")"; shift;;
 			-host|-net);;
 			*) cmd="${cmd} $1";;
