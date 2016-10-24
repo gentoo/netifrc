@@ -272,8 +272,8 @@ _add_route()
 				error|fatal) msgfunc=eerror rc=1;;
 				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
-			eval $msgfunc "Route '$cmd' already existed."
-			eval $msgfunc \"$(ip $family route show $cmd dev "${IFACE}" 2>&1)\"
+			eval $msgfunc "Route '$cmd_nometric' already existed:"
+			eval $msgfunc \"$(ip $family route show ${cmd_nometric} dev "${IFACE}" 2>&1)\"
 		else
 			: # TODO: Handle other errors
 		fi
