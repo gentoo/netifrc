@@ -162,11 +162,6 @@ _add_address()
 		esac
 	done
 
-	# Always scope lo addresses as host unless specified otherwise
-	if [ "${IFACE}" = "lo" ]; then
-		[ -z "$scope" ] && scope="host"
-	fi
-
 	# figure out the broadcast address if it is not specified
 	# This must NOT be set for IPv6 addresses
 	case $family in
