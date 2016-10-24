@@ -248,7 +248,7 @@ _get_errorhandler_behavior() {
 		"errh_DEFAULT_DEFAULT_DEFAULT" \
 		"errh" \
 		"fallback" ; do
-		eval value="\${key}"
+		eval value="\${${key}}"
 		if [ -n "$value" ]; then
 			echo "$value" && break
 		fi
@@ -844,3 +844,5 @@ stop()
 
 	return 0
 }
+
+# vim:filetype=gentoo-init-d:

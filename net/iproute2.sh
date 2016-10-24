@@ -112,7 +112,7 @@ _add_address()
 	local confflaglist family raw_address family_maxnetmask
 	raw_address="$1" ; shift
 	# Extract the netmask on address if present.
-	if [ "${address%\/*}" != "${address}" ]; then
+	if [ "${raw_address%\/*}" != "${raw_address}" ]; then
 		address="${raw_address%\/*}"
 		netmask="${raw_address#*\/}"
 	else
@@ -193,15 +193,14 @@ _add_address()
 		# You can completely silence this with: errh_IFVAR_address_EEXIST=continue
 		if [ $address_already_exists -eq 0 ]; then
 			eh_behavior=$(_get_errorhandler_behavior "$IFVAR" "address" "EEXIST" "warn")
-			abort=0
 			case $eh_behavior in
-				continue) msgfunc=true ;;
-				info) msgfunc=einfo ;;
-				warn) msgfunc=ewarn ;;
-				error|fatal) msgfunc=eerror abort=1;;
+				continue) msgfunc=true rc=0 ;;
+				info) msgfunc=einfo rc=0 ;;
+				warn) msgfunc=ewarn rc=0 ;;
+				error|fatal) msgfunc=eerror rc=1;;
 			esac
-			$msgfunc "Address ${address}${netmask:+/}${netmask} already existed: $(ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)"
-			[ $abort -eq 1 ] && rc=1
+			eval $msgfunc "Address ${address}${netmask:+/}${netmask} already existed!"
+			eval $msgfunc \"$(ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)\"
 		else
 			: # TODO: Handle other errors
 		fi
@@ -265,15 +264,14 @@ _add_route()
 		# You can completely silence this with: errh_IFVAR_route_EEXIST=continue
 		if [ $route_already_exists -eq 0 ]; then
 			eh_behavior=$(_get_errorhandler_behavior "$IFVAR" "route" "EEXIST" "warn")
-			abort=0
 			case $eh_behavior in
-				continue) msgfunc=true ;;
-				info) msgfunc=einfo ;;
-				warn) msgfunc=ewarn ;;
-				error|fatal) msgfunc=eerror abort=1;;
+				continue) msgfunc=true rc=0 ;;
+				info) msgfunc=einfo rc=0 ;;
+				warn) msgfunc=ewarn rc=0 ;;
+				error|fatal) msgfunc=eerror rc=1;;
 			esac
-			$msgfunc "Route '$cmd' already existed: $(ip $family route show $cmd dev "${IFACE}" 2>&1)"
-			[ $abort -eq 1 ] && rc=1
+			eval $msgfunc "Route '$cmd' already existed."
+			eval $msgfunc \"$(ip $family route show $cmd dev "${IFACE}" 2>&1)\"
 		else
 			: # TODO: Handle other errors
 		fi
