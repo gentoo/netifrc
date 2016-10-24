@@ -82,7 +82,7 @@ bonding_pre_start()
 		n=${x##*/}
 		eval s=\$${n}_${IFVAR}
 		# skip mode and miimon
-		[ "${n}" == "mode" -o "${n}" == "miimon" ] && continue
+		[ "${n}" = "mode" -o "${n}" = "miimon" ] && continue
 		if [ -n "${s}" ]; then
 			einfo "Setting ${n}: ${s}"
 			echo "${s}" >"${x}" || \

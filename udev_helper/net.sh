@@ -48,6 +48,6 @@ fi
 
 # If we're stopping then sleep for a bit in-case a daemon is monitoring
 # the interface. This to try and ensure we stop after they do.
-[ "${ACTION}" == "stop" ] && sleep 2
+[ "${ACTION}" = "stop" ] && sleep 2
 
 IN_HOTPLUG=1 "${SCRIPT}" --quiet "${ACTION}"
