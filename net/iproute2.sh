@@ -198,6 +198,7 @@ _add_address()
 				info) msgfunc=einfo rc=0 ;;
 				warn) msgfunc=ewarn rc=0 ;;
 				error|fatal) msgfunc=eerror rc=1;;
+				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
 			eval $msgfunc "Address ${address}${netmask:+/}${netmask} already existed!"
 			eval $msgfunc \"$(ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)\"
@@ -269,6 +270,7 @@ _add_route()
 				info) msgfunc=einfo rc=0 ;;
 				warn) msgfunc=ewarn rc=0 ;;
 				error|fatal) msgfunc=eerror rc=1;;
+				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
 			eval $msgfunc "Route '$cmd' already existed."
 			eval $msgfunc \"$(ip $family route show $cmd dev "${IFACE}" 2>&1)\"
