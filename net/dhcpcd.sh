@@ -15,7 +15,7 @@ _config_vars="$_config_vars dhcp dhcpcd"
 
 dhcpcd_start()
 {
-	local args= opt= opts= pidfile="/var/run/dhcpcd-${IFACE}.pid" new=true
+	local args= opt= opts= pidfile="/run/dhcpcd-${IFACE}.pid" new=true
 	eval args=\$dhcpcd_${IFVAR}
 	[ -z "${args}" ] && args=${dhcpcd}
 
@@ -74,7 +74,7 @@ dhcpcd_start()
 
 dhcpcd_stop()
 {
-	local pidfile="/var/run/dhcpcd-${IFACE}.pid" opts= sig=SIGTERM
+	local pidfile="/run/dhcpcd-${IFACE}.pid" opts= sig=SIGTERM
 	[ ! -f "${pidfile}" ] && return 0
 
 	ebegin "Stopping dhcpcd on ${IFACE}"

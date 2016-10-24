@@ -13,7 +13,7 @@ _config_vars="$_config_vars ipppd"
 
 ipppd_pre_start()
 {
-	local opts= pidfile="/var/run/ipppd-${IFACE}.pid"
+	local opts= pidfile="/run/ipppd-${IFACE}.pid"
 
 	# Check that we are a valid ippp interface
 	case "${IFACE}" in
@@ -37,7 +37,7 @@ ipppd_pre_start()
 
 ipppd_post_stop()
 {
-	local pidfile="/var/run/ipppd-${IFACE}.pid"
+	local pidfile="/run/ipppd-${IFACE}.pid"
 
 	[ ! -f "${pidfile}" ] && return 0
 

@@ -25,7 +25,7 @@ from file import save as backend_save, fetch as backend_retrieve
 
 
 def get_mode():
-    if(os.path.exists("/var/run/openrc")):
+    if(os.path.exists("/run/openrc")):
         return defaults['MODE_MASTER']
     return defaults['MODE_SLAVE']
 
@@ -35,7 +35,7 @@ def normalize(*args):
 
 
 def _service_call(iface, command):
-    if(os.path.exists("/var/run/openrc")):
+    if(os.path.exists("/run/openrc")):
         subprocess.check_call(["rc-service", "net."+iface, command])
     elif(os.path.exists("/run/systemd")):
         subprocess.check_call(["systemctl", command, "net@"+iface])

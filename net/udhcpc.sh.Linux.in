@@ -12,7 +12,7 @@ _config_vars="$_config_vars dhcp udhcpc"
 
 udhcpc_start()
 {
-	local args= opt= opts= pidfile="/var/run/udhcpc-${IFACE}.pid"
+	local args= opt= opts= pidfile="/run/udhcpc-${IFACE}.pid"
 	local sendhost=true cachefile="/var/cache/udhcpc-${IFACE}.lease"
 
 	eval args=\$udhcpc_${IFVAR}
@@ -24,7 +24,7 @@ udhcpc_start()
 	# This omits the Gentoo specific patch to busybox,
 	# but it creates temporary files.
 	# We can move this stuff to udhcpc hook script to avoid that, should we do?
-	local conf="/var/run/udhcpc-${IFACE}.conf"
+	local conf="/run/udhcpc-${IFACE}.conf"
 	>"$conf"
 	# Map some generic options to dhcpcd
 	for opt in ${opts}; do
@@ -83,7 +83,7 @@ udhcpc_start()
 
 udhcpc_stop()
 {
-	local pidfile="/var/run/udhcpc-${IFACE}.pid" opts=
+	local pidfile="/run/udhcpc-${IFACE}.pid" opts=
 	[ ! -f "${pidfile}" ] && return 0
 
 	# Get our options
@@ -104,7 +104,7 @@ udhcpc_stop()
 	start-stop-daemon --stop --exec /bin/busybox --pidfile "${pidfile}"
 	eend $?
 
-	if [ -e "/var/run/udhcpc-${IFACE}.conf" ]; then
-		rm -f "/var/run/udhcpc-${IFACE}.conf"
+	if [ -e "/run/udhcpc-${IFACE}.conf" ]; then
+		rm -f "/run/udhcpc-${IFACE}.conf"
 	fi
 }

@@ -12,7 +12,7 @@ _config_vars="$_config_vars dhcp dhcpcd"
 
 dhclient_start()
 {
-	local args= opt= opts= pidfile="/var/run/dhclient-${IFACE}.pid"
+	local args= opt= opts= pidfile="/run/dhclient-${IFACE}.pid"
 	local sendhost=true dconf=
 
 	# Get our options
@@ -55,7 +55,7 @@ dhclient_start()
 
 dhclient_stop()
 {
-	local pidfile="/var/run/dhclient-${IFACE}.pid" opts=
+	local pidfile="/run/dhclient-${IFACE}.pid" opts=
 	[ ! -f "${pidfile}" ] && return 0
 
 	# Get our options

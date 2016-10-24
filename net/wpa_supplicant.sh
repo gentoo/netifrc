@@ -128,7 +128,7 @@ wpa_supplicant_pre_start()
 			esac
 			ctrl_dir=${ctrl_dir%% *}
 		else
-			ctrl_dir="/var/run/wpa_supplicant"
+			ctrl_dir="/run/wpa_supplicant"
 			opts="${opts} -C ${ctrl_dir}"
 		fi
 	fi
@@ -140,9 +140,9 @@ wpa_supplicant_pre_start()
 		mark_service_inactive
 	fi
 	start-stop-daemon --start --exec "${wpas}" \
-		--pidfile "/var/run/wpa_supplicant-${IFACE}.pid" \
+		--pidfile "/run/wpa_supplicant-${IFACE}.pid" \
 		-- ${opts} -B -i "${IFACE}" \
-		-P "/var/run/wpa_supplicant-${IFACE}.pid"
+		-P "/run/wpa_supplicant-${IFACE}.pid"
 	eend $? || return 1
 
 	# If we don't have a working wpa_cli and action file continue
@@ -162,9 +162,9 @@ wpa_supplicant_pre_start()
 
 	ebegin "Starting wpa_cli on" "${IFACE}"
 	start-stop-daemon --start --exec "${wpac}" \
-		--pidfile "/var/run/wpa_cli-${IFACE}.pid" \
+		--pidfile "/run/wpa_cli-${IFACE}.pid" \
 		-- ${cliopts} -a "${actfile}" -p "${ctrl_dir}" -i "${IFACE}" \
-		-P "/var/run/wpa_cli-${IFACE}.pid" -B
+		-P "/run/wpa_cli-${IFACE}.pid" -B
 	if eend $?; then
 		ebegin "Backgrounding ..."
 		exit 1
@@ -172,7 +172,7 @@ wpa_supplicant_pre_start()
 
 	# wpa_cli failed to start? OK, error here
 	start-stop-daemon --quiet --stop --exec "${wpas}" \
-		--pidfile "/var/run/wpa_supplicant-${IFACE}.pid"
+		--pidfile "/run/wpa_supplicant-${IFACE}.pid"
 	${inact} ||	mark_service_stopped
 	return 1
 }
@@ -192,14 +192,14 @@ wpa_supplicant_post_stop()
 	fi
 	[ $? != 0 ] && return 0
 
-	local pidfile="/var/run/wpa_cli-${IFACE}.pid"
+	local pidfile="/run/wpa_cli-${IFACE}.pid"
 	if [ -f ${pidfile} ]; then
 		ebegin "Stopping wpa_cli on ${IFACE}"
 		start-stop-daemon --stop --exec "${wpac}" --pidfile "${pidfile}"
 		eend $?
 	fi
 
-	pidfile="/var/run/wpa_supplicant-${IFACE}.pid"
+	pidfile="/run/wpa_supplicant-${IFACE}.pid"
 	if [ -f ${pidfile} ]; then
 		ebegin "Stopping wpa_supplicant on ${IFACE}"
 		start-stop-daemon --stop --exec "${wpas}" --pidfile "${pidfile}"
@@ -207,6 +207,6 @@ wpa_supplicant_post_stop()
 	fi
 
 	# If wpa_supplicant exits uncleanly, we need to remove the stale dir
-	[ -S "/var/run/wpa_supplicant/${IFACE}" ] \
-		&& rm -f "/var/run/wpa_supplicant/${IFACE}"
+	[ -S "/run/wpa_supplicant/${IFACE}" ] \
+		&& rm -f "/run/wpa_supplicant/${IFACE}"
 }

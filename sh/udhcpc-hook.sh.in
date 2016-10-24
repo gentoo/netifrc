@@ -113,8 +113,8 @@ deconfig()
 	fi
 }
 
-if [ -r "/var/run/udhcpc-${interface}.conf" ]; then
-	. "/var/run/udhcpc-${interface}.conf"
+if [ -r "/run/udhcpc-${interface}.conf" ]; then
+	. "/run/udhcpc-${interface}.conf"
 fi
 
 case "$1" in

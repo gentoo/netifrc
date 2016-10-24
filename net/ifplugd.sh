@@ -13,7 +13,7 @@ ifplugd_depend()
 
 ifplugd_pre_start()
 {
-	local pidfile="/var/run/ifplugd.${IFACE}.pid" timeout= args=
+	local pidfile="/run/ifplugd.${IFACE}.pid" timeout= args=
 
 	# We don't start ifplugd if we're being called from the background
 	yesno ${IN_BACKGROUND} && return 0
@@ -84,7 +84,7 @@ ifplugd_stop()
 {
 	yesno ${IN_BACKGROUND} && return 0
 
-	local pidfile="/var/run/ifplugd.${IFACE}.pid"
+	local pidfile="/run/ifplugd.${IFACE}.pid"
 	[ ! -e "${pidfile}" ] && return 0
 
 	ebegin "Stopping ifplugd on ${IFACE}"

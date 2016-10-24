@@ -12,7 +12,7 @@ pppd_depend()
 
 is_ppp()
 {
-	[ -e /var/run/ppp-"${IFACE}".pid ]
+	[ -e /run/ppp-"${IFACE}".pid ]
 }
 
 requote()
@@ -106,7 +106,7 @@ pppd_pre_start()
 	${hasmaxfail} || opts="${opts} maxfail 0"
 	${haspersist} || opts="${opts} persist"
 
-	# Set linkname because we need /var/run/ppp-${linkname}.pid
+	# Set linkname because we need /run/ppp-${linkname}.pid
 	# This pidfile has the advantage of being there,
 	# even if ${IFACE} interface was never started
 	opts="linkname ${IFACE} ${opts}"
@@ -201,10 +201,10 @@ pppd_pre_start()
 	&& [ -n "${password}" -o -z "${passwordset}" ]; then
 		printf "%s" "${password}" | \
 		eval start-stop-daemon --start --exec /usr/sbin/pppd \
-			--pidfile "/var/run/ppp-${IFACE}.pid" -- "${opts}" >/dev/null
+			--pidfile "/run/ppp-${IFACE}.pid" -- "${opts}" >/dev/null
 	else
 		eval start-stop-daemon --start --exec /usr/sbin/pppd \
-			--pidfile "/var/run/ppp-${IFACE}.pid" -- "${opts}" >/dev/null
+			--pidfile "/run/ppp-${IFACE}.pid" -- "${opts}" >/dev/null
 	fi
 
 	if ! eend $? "Failed to start PPP"; then
@@ -231,7 +231,7 @@ pppd_start()
 pppd_stop()
 {
 	yesno ${IN_BACKGROUND} && return 0
-	local pidfile="/var/run/ppp-${IFACE}.pid"
+	local pidfile="/run/ppp-${IFACE}.pid"
 
 	[ ! -s "${pidfile}" ] && return 0
 

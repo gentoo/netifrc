@@ -21,7 +21,7 @@ atmclip_svc_start()
     ebegin "Starting $2 Daemon ($1)"
     start-stop-daemon --start \
 		--background \
-		--make-pidfile --pidfile "/var/run/$1.pid" \
+		--make-pidfile --pidfile "/run/$1.pid" \
 		--exec "/usr/sbin/$1" -- -l syslog
     eend $?
 }
@@ -49,7 +49,7 @@ atmclip_svc_stop()
 {
     ebegin "Stopping $2 Daemon ($1)"
     start-stop-daemon --stop --quiet \
-		--pidfile "/var/run/$1.pid" \
+		--pidfile "/run/$1.pid" \
 		--exec "/usr/sbin/$1"
     eend $?
 }
@@ -73,13 +73,13 @@ atmclip_svcs_stop()
 
 are_atmclip_svcs_running()
 {
-	[ -f /var/run/atmarpd.pid ] || return 1
-	start-stop-daemon --quiet --test --stop --pidfile /var/run/atmarpd.pid || return 1
+	[ -f /run/atmarpd.pid ] || return 1
+	start-stop-daemon --quiet --test --stop --pidfile /run/atmarpd.pid || return 1
 
 	if yesno ${clip_full:-yes}; then
-		[ -f /var/run/ilmid.pid -a -f /var/run/atmsigd.pid ] || return 1
-		start-stop-daemon --quiet --test --stop --pidfile /var/run/ilmid.pid || return 1
-		start-stop-daemon --quiet --test --stop --pidfile /var/run/atmsigd.pid || return 1
+		[ -f /run/ilmid.pid -a -f /run/atmsigd.pid ] || return 1
+		start-stop-daemon --quiet --test --stop --pidfile /run/ilmid.pid || return 1
+		start-stop-daemon --quiet --test --stop --pidfile /run/atmsigd.pid || return 1
 	fi
 
     return 0

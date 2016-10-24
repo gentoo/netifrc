@@ -34,14 +34,14 @@ br2684ctl_pre_start()
 
 	einfo "Starting RFC 2684 Bridge control on ${IFACE}"
 	start-stop-daemon --start --exec $(_which br2684ctl) --background \
-		--make-pidfile --pidfile "/var/run/br2684ctl-${IFACE}.pid" \
+		--make-pidfile --pidfile "/run/br2684ctl-${IFACE}.pid" \
 		-- -c "${IFACE#nas*}" ${opts}
 	eend $?
 }
 
 br2684ctl_post_stop()
 {
-	local pidfile="/var/run/br2684ctl-${IFACE}.pid"
+	local pidfile="/run/br2684ctl-${IFACE}.pid"
 	[ -e "${pidfile}" ] || return 0
 
 	einfo "Stopping RFC 2684 Bridge control on ${IFACE}"

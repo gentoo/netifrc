@@ -48,7 +48,7 @@ adsl_start()
 	(
 	cat "${cfgfile}";
 	echo "ETH=${IFACE}";
-	echo "PIDFILE=/var/run/rp-pppoe-${IFACE}.pid";
+	echo "PIDFILE=/run/rp-pppoe-${IFACE}.pid";
 	[ -n "${user}" ] && echo "USER=${user}";
 	) | ${exe} >/dev/null
 	eend $?
@@ -58,7 +58,7 @@ adsl_stop()
 {
 	local exe= cfgfile=
 
-	[ ! -f /var/run/rp-pppoe-"${IFACE}".pid ] && return 0
+	[ ! -f /run/rp-pppoe-"${IFACE}".pid ] && return 0
 
 	adsl_setup_vars stop || return 1
 
@@ -66,7 +66,7 @@ adsl_stop()
 	(
 	cat "${cfgfile}";
 	echo "ETH=${IFACE}";
-	echo "PIDFILE=/var/run/rp-pppoe-${IFACE}.pid";
+	echo "PIDFILE=/run/rp-pppoe-${IFACE}.pid";
 	) | ${exe} >/dev/null
 	eend $?
 
