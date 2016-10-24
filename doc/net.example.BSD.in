@@ -367,8 +367,8 @@
 # will be listed in /etc/resolv.conf even if there were any there to start
 # with.
 # If this is an issue for you then maybe you should look into a resolv.conf
-# manager like resolvconf-gentoo to manage this file for you. All packages
-# that baselayout supports use resolvconf-gentoo if installed.
+# manager like net-dns/openresolv to manage this file for you. All packages
+# that baselayout supports use net-dns/openresolv if installed.
 
 #-----------------------------------------------------------------------------
 # Cable in/out detection
