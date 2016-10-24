@@ -441,6 +441,8 @@ iproute2_post_start()
 	[ -z "$policyroute_order" ] && policyroute_order=${policy_rules_before_routes:-no}
 	yesno "$policyroute_order" || _iproute2_policy_routing
 
+	# This block must be non-fatal, otherwise the interface will not be
+	# recorded as starting, and later services may be blocked.
 	if _iproute2_ipv6_tentative; then
 		einfon "Waiting for IPv6 addresses (${_dad_timeout} seconds) "
 		while [ $_dad_timeout -gt 0 ]; do
@@ -454,7 +456,6 @@ iproute2_post_start()
 
 		if [ $_dad_timeout -le 0 ]; then
 			eend 1
-			return 1
 		else
 			eend 0
 		fi
