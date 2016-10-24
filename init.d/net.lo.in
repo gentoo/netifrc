@@ -735,7 +735,7 @@ ${routes}"
 			*:*/*)                             cmd="-net ${cmd}";;
 			*)                                 cmd="-host ${cmd}";;
 		esac
-		_add_route ${fam} ${cmd} >/dev/null
+		_add_route ${fam} ${cmd}
 		eend $?
 		eoutdent
 	done
