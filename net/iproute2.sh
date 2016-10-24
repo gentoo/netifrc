@@ -232,13 +232,13 @@ _add_route()
 		set -- "${one}" "${two}" via "$@"
 	fi
 
-	local cmd= have_metric=false
+	local cmd= cmd_nometric= have_metric=false
 	while [ -n "$1" ]; do
 		case "$1" in
-			metric) cmd="${cmd} metric $2"; shift ; have_metric=true;;
-			netmask) cmd="${cmd}/$(_netmask2cidr "$2")"; shift;;
+			metric) metric=$2 ; cmd="${cmd} metric $2" ; shift ; have_metric=true ;;
+			netmask) x="/$(_netmask2cidr "$2")" ; cmd="${cmd}${x}" ; cmd_nometric="${cmd}${x}" ; shift;;
 			-host|-net);;
-			*) cmd="${cmd} $1";;
+			*) cmd="${cmd} ${1}" ; cmd_nometric="${cmd_nometric} ${1}" ;;
 		esac
 		shift
 	done
@@ -252,7 +252,7 @@ _add_route()
 	fi
 
 	# Check for route already existing:
-	ip ${family} route show ${cmd} dev "${IFACE}" 2>/dev/null | \
+	ip ${family} route show ${cmd_nometric} dev "${IFACE}" 2>/dev/null | \
 		fgrep -sq "${cmd%% *}"
 	route_already_exists=$?
 
