@@ -14,7 +14,7 @@ macchanger_pre_start()
 	# We don't change MAC addresses from background
 	yesno ${IN_BACKGROUND} && return 0
 
-	local mac= opts=
+	local mac= opts= try= output= rc=
 
 	eval mac=\$mac_${IFVAR}
 	[ -z "${mac}" ] && return 0
@@ -60,7 +60,7 @@ macchanger_pre_start()
 		random-full|random) opts="${opts} -r";;
 
 		# default case is just to pass on all the options
-		*) opts="${opts} ${mac}";;
+		*) opts="${opts} -m ${mac}";;
 	esac
 
 	if [ ! -x /sbin/macchanger ]; then
@@ -68,24 +68,24 @@ macchanger_pre_start()
 		return 1
 	fi
 
-	mac=$(/sbin/macchanger ${opts} "${IFACE}" \
-		| sed -n -e 's/^\(Faked\|New\) MAC:.*\<\(..:..:..:..:..:..\)\>.*/\U\2/p' )
-	_up
+	for try in 1 2; do
+		# Sometimes the interface needs to be up
+		[ "${try}" -eq 2 ] && _up
+		output=$(/sbin/macchanger ${opts} "${IFACE}")
+		rc=$?
+		[ "${rc}" -eq 0 ] && break
+	done
 
-	# Sometimes the interface needs to be up ....
-	if [ -z "${mac}" ]; then
-		mac=$(/sbin/macchanger ${opts} "${IFACE}" \
-		| sed -n -e 's/^\(Faked\|New\) MAC:.*\<\(..:..:..:..:..:..\)\>.*/\U\2/p' )
-	fi
-
-	if [ -z "${mac}" ]; then
+	if [ "${rc}" -ne 0 ]; then
+		eerror "${output}"
 		eend 1 "Failed to set MAC address"
 		return 1
 	fi
 
 	eend 0
 	eindent
-	einfo "changed to" "${mac}"
+	newmac=$(_get_mac_address)
+	einfo "changed to ${newmac}"
 	eoutdent
 
 	return 0
