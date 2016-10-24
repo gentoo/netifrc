@@ -61,11 +61,35 @@ update_interface()
 	ifconfig "${interface}" ${ip} ${broadcast} ${netmask} ${mtu}
 }
 
+update_classless_routes()
+{
+	if [ -n "${staticroutes}" ] ; then
+		max_routes=128
+		metric=
+		[ -n "${IF_METRIC}" ] && metric="metric ${IF_METRIC}"
+		while [ -n "$1" -a -n "$2" -a $max_routes -gt 0 ]; do
+			gw_arg=
+			if [ "$2" != '0.0.0.0' ]; then
+				gw_arg="gw $2"
+			fi
+
+			[ ${1##*/} -eq 32 ] && type=host || type=net
+			route add -$type "$1" ${gw_arg} ${metric} dev "${interface}"
+			max=$(($max-1))
+			shift 2
+		done
+	fi
+}
 update_routes()
 {
 	peer_var "${PEER_ROUTERS}" && return
 
-	if [ -n "${router}" ] ; then
+	# RFC 3442
+	[ -n "${staticroutes}" ] && update_classless_routes $staticroutes
+
+	# If the DHCP server returns both a Classless Static Routes option and
+	# a Router option, the DHCP client MUST ignore the Router option.
+	if [ -n "${router}" -a -z "${staticroutes}" ] ; then
 		metric=
 		[ -n "${IF_METRIC}" ] && metric="metric ${IF_METRIC}"
 		for i in ${router} ; do
