@@ -133,7 +133,7 @@ _add_address()
 					eerror "Too many netmasks: $raw_address netmask $1"
 					return 1
 				fi
-				netmask="/$(_netmask2cidr "$1")"
+				netmask="$(_netmask2cidr "$1")"
 				shift ;;
 			broadcast|brd|br*)
 				broadcast="$1" ; shift ;;
