@@ -32,6 +32,10 @@ _l2tp_eval_props() {
 }
 
 _is_l2tp() {
+	# Check for L2TP support in kernel
+	ip l2tp show session &>/dev/null
+	[ $? -ne 0 ] && return 1
+
 	eval "$(ip l2tp show session | \
 		awk "match(\$0, /^Session ([0-9]+) in tunnel ([0-9]+)\$/, ret) {sid=ret[1]; tid=ret[2]} 
 		match(\$0, /^[ ]*interface name: ${IFACE}\$/) {print \"session_id=\"sid\";tunnel_id=\"tid; exit}")"
