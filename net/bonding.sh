@@ -1,4 +1,5 @@
 # Copyright (c) 2007-2008 Roy Marples <roy@marples.name>
+#               2017      Marc Schiffbauer <mschiff@gentoo.org>
 # Released under the 2-clause BSD license.
 
 bonding_depend()
@@ -21,7 +22,7 @@ _is_bond()
 
 bonding_pre_start()
 {
-	local x= s= n= slaves= primary=
+	local x= s= n= i= slaves= primary=
 
 	slaves="$(_get_array "slaves_${IFVAR}")"
 	unset slaves_${IFVAR}
@@ -76,13 +77,26 @@ bonding_pre_start()
 			eerror "Failed to configure $n (${n}_${IFVAR})"
 		fi
 	done
+	# Configure arp ip targets, they need to be added one after another
+	n=arp_ip_target
+	x=/sys/class/net/"${IFACE}"/bonding/$n
+	[ -d /sys/class/net ] && if [ -f "$x" ]; then
+		eval s=\$${n}_${IFVAR}
+		if [ -n "${s}" ]; then
+			for i in $s; do
+				einfo "Adding ${n}: ${i}"
+				echo "+${i/+/}" >"${x}" || \
+				eerror "Failed to add $i (${n}_${IFVAR})"
+			done
+		fi
+	fi
 	# Nice and dynamic for remaining options:)
 	[ -d /sys/class/net ] && for x in /sys/class/net/"${IFACE}"/bonding/*; do
 		[ -f "${x}" ] || continue
 		n=${x##*/}
 		eval s=\$${n}_${IFVAR}
 		# skip mode and miimon
-		[ "${n}" = "mode" -o "${n}" = "miimon" ] && continue
+		[ "${n}" = "mode" -o "${n}" = "miimon" -o "${n}" = "arp_ip_target" ] && continue
 		if [ -n "${s}" ]; then
 			einfo "Setting ${n}: ${s}"
 			echo "${s}" >"${x}" || \
