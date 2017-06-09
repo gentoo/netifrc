@@ -78,6 +78,7 @@ bonding_pre_start()
 		fi
 	done
 	# Configure arp ip targets, they need to be added one after another
+	# With a leading '+' as a prefix.
 	n=arp_ip_target
 	x=/sys/class/net/"${IFACE}"/bonding/$n
 	[ -d /sys/class/net ] && if [ -f "$x" ]; then
@@ -94,9 +95,14 @@ bonding_pre_start()
 	[ -d /sys/class/net ] && for x in /sys/class/net/"${IFACE}"/bonding/*; do
 		[ -f "${x}" ] || continue
 		n=${x##*/}
+		# These entries are already handled above.
+		case "$n" in
+			mode) continue ;;
+			miimon) continue ;;
+			arp_ip_target) continue ;;
+		esac
+		# Check if anything to do.
 		eval s=\$${n}_${IFVAR}
-		# skip mode and miimon
-		[ "${n}" = "mode" -o "${n}" = "miimon" -o "${n}" = "arp_ip_target" ] && continue
 		if [ -n "${s}" ]; then
 			einfo "Setting ${n}: ${s}"
 			echo "${s}" >"${x}" || \
@@ -156,7 +162,7 @@ bonding_pre_start()
 		fi
 		# up the interface
 		_up
-    fi
+	fi
 
 	# finally add in slaves
 	# things needed in the process, and if they are done by ifenslave, openrc, and/or the kernel.
