@@ -381,10 +381,11 @@ iproute2_pre_start()
 		# be passed to iproute2 during tunnel creation.
 		# state 'any' does not exist for IPv4
 		local ipproto=''
-		[ "${tunnel##mode ipip6}" != "${tunnel}" ] && ipproto='-6'
-		[ "${tunnel##mode ip6ip6}" != "${tunnel}" ] && ipproto='-6'
-		[ "${tunnel##mode ip6gre}" != "${tunnel}" ] && ipproto='-6'
-		[ "${tunnel##mode any}" != "${tunnel}" ] && ipproto='-6'
+		case $tunnel in
+			*mode\ ipip6*) ipproto='-6' ;;
+			*mode\ ip6*) ipproto='-6' ;;
+			*mode\ any*) ipproto='-6' ;;
+		esac
 
 		ebegin "Creating tunnel ${IFVAR}"
 		veinfo ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
@@ -396,9 +397,11 @@ iproute2_pre_start()
 	eval link=\$iplink_${IFVAR}
 	if [ -n "${link}" ]; then
 		local ipproto=''
-		[ "${tunnel##mode ip6gre}" != "${tunnel}" ] && ipproto='-6'
-		[ "${tunnel##mode ip6gretap}" != "${tunnel}" ] && ipproto='-6'
-		[ "${tunnel##mode ip6tnl}" != "${tunnel}" ] && ipproto='-6'
+		case $tunnel in
+			*mode\ ipip6*) ipproto='-6' ;;
+			*mode\ ip6*) ipproto='-6' ;;
+			*mode\ any*) ipproto='-6' ;;
+		esac
 
 		ebegin "Creating interface ${IFVAR}"
 		veinfo ip ${ipproto} link add "${IFACE}" ${link}
