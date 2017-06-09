@@ -392,6 +392,20 @@ iproute2_pre_start()
 		eend $? || return 1
 		_up
 	fi
+	local link=
+	eval link=\$iplink_${IFVAR}
+	if [ -n "${link}" ]; then
+		local ipproto=''
+		[ "${tunnel##mode ip6gre}" != "${tunnel}" ] && ipproto='-6'
+		[ "${tunnel##mode ip6gretap}" != "${tunnel}" ] && ipproto='-6'
+		[ "${tunnel##mode ip6tnl}" != "${tunnel}" ] && ipproto='-6'
+
+		ebegin "Creating interface ${IFVAR}"
+		veinfo ip ${ipproto} link add "${IFACE}" ${link}
+		ip ${ipproto} link add "${IFACE}" ${link}
+		eend $? || return 1
+		_up
+	fi
 
 	# MTU support
 	local mtu=
@@ -415,6 +429,13 @@ iproute2_pre_start()
 	yesno "$policyroute_order" && _iproute2_policy_routing
 
 	return 0
+}
+
+_iproute2_link_delete() {
+	ebegin "Destroying interface $1"
+	veinfo ip link del dev "$1"
+	ip link del dev "$1"
+	eend $?
 }
 
 _iproute2_ipv6_tentative()
@@ -499,6 +520,8 @@ iproute2_post_stop()
 			ip tunnel del "${IFACE}"
 			eend $?
 		fi
+		[ -n "$(ip link show "${IFACE}" type gretap 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
+		[ -n "$(ip link show "${IFACE}" type vxlan 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
 	fi
 }
 

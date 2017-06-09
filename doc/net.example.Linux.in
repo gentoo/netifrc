@@ -966,6 +966,12 @@
 # For IPIP tunnels
 #iptunnel_vpn0="mode ipip remote 207.170.82.2 ttl 255"
 
+# For GRETAP tunnels (works only with sys-apps/iproute2)
+#iplink_vpn0="type gretap remote 207.170.82.3 ttl 255"
+
+# For VXLAN tunnels (works only with sys-apps/iproute2)
+#iplink_vpn0="type vxlan id 1 group 207.170.82.4 local 207.170.82.100 dstport 4789 dev eth0"
+
 # To configure the interface
 #config_vpn0="192.168.0.2 pointopoint 192.168.1.2"	# ifconfig style
 #config_vpn0="192.168.0.2 peer 192.168.1.1"		# iproute2 style
