@@ -434,6 +434,13 @@ iproute2_pre_start()
 	return 0
 }
 
+_iproute2_tunnel_delete() {
+	ebegin "Destroying tunnel $1"
+	veinfo ip $2 tunnel del "$1"
+	ip $2 tunnel del "$1"
+	eend $?
+}
+
 _iproute2_link_delete() {
 	ebegin "Destroying interface $1"
 	veinfo ip link del dev "$1"
@@ -518,11 +525,11 @@ iproute2_post_stop()
 	# Don't delete sit0 as it's a special tunnel
 	if [ "${IFACE}" != "sit0" ]; then
 		if [ -n "$(ip tunnel show "${IFACE}" 2>/dev/null)" ]; then
-			ebegin "Destroying tunnel ${IFACE}"
-			veinfo ip tunnel del "${IFACE}"
-			ip tunnel del "${IFACE}"
-			eend $?
+			_iproute2_tunnel_delete "${IFACE}"
+		elif  [ -n "$(ip -6 tunnel show "${IFACE}" 2>/dev/null)" ]; then
+			_iproute2_tunnel_delete "${IFACE}" -6
 		fi
+
 		[ -n "$(ip link show "${IFACE}" type gretap 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
 		[ -n "$(ip link show "${IFACE}" type vxlan 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
 	fi
