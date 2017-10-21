@@ -1,0 +1,24 @@
+certificate version 0.1
+pusher 0xEE05E6F6A48F6136 1508619383 -0700
+pushee git+ssh://git.gentoo.org/proj/netifrc.git
+nonce 1508619383-571b30af8cf0ebbd307b
+
+6f5d456e3191dce6e7a86d7970b2ed7503854784 db06d25f32a8cc4033d307ec0e6ceb856355f2d3 refs/heads/master
+-----BEGIN PGP SIGNATURE-----
+
+iQKTBAABCgB9FiEEveu2pS8Vb98xaNkRGTlfI8WIJsQFAlnrtHdfFIAAAAAALgAo
+aXNzdWVyLWZwckBub3RhdGlvbnMub3BlbnBncC5maWZ0aGhvcnNlbWFuLm5ldEJE
+RUJCNkE1MkYxNTZGREYzMTY4RDkxMTE5Mzk1RjIzQzU4ODI2QzQACgkQGTlfI8WI
+JsStKxAAiKOTYRZf7ZX++TxMw/HRFc1qfleZWmSHPjygG/NxZiddufqHwXT8iEPr
+7f8OQbk4AOz6/kO4NJptuoKDXMY1iKbedAVr2F6k1DKDcfeXNr3+wkeF1SnmG0GX
+w3h1+ncakRG0EFjasorwkcT8emE8K8ZUVjN4BGxrdOotQFrru1TbXK/b/Uu2dzT/
+ngYybGzHd3UanhyvWqPl8JtF2D4q1gzV+Tf13Sik8zADcf9+9R6W+gasbEG7iJXW
+xtr2qFkilPlBAyY3O8kp3AsrJjxgeUPr1q0N+SOZXe0yEtQOzBcZuDpGxSASa+/6
+0w3L8cFu+9JBfTzI0qPB5+5cm3AE6Si5G4o1E0q+0alov8UcCleXVmH5hsT5qUZs
+DjyyoxVuXPTCkpvD6+GXCLyOfhBnlgtpEpFa8wsvH9kJLnN6MBGdXugfre2xXJij
+owah8jxKGj3czzDzacuM7+YZ7oPQP10Ymuxd0ijtIW/mPs2CnEMkcNDgok9ZnP3f
+WnKNUmMtKlRkYkY5GbChxCixqLSd8toIbvzpmDboER41B4k87ffbeY2fQrALCtSP
+TF68RXFawx8Dn6Qp7M5UtcAAmt9dMsevtFIj8QjgV563fzW8l7juqTY8niUjppnb
+8O72ZlwwYb36PDkB2HewEfBKZdV6EoAfUgEfIGdx9dwrnJ0mhQ0=
+=wahc
+-----END PGP SIGNATURE-----
