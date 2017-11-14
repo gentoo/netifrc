@@ -8,16 +8,21 @@ iproute2_depend()
 	after ifconfig
 }
 
+# This helper exists for the common pattern of 'veinfo $CMD ; $CMD'
+_cmd()
+{
+	veinfo "${@}"
+	"${@}"
+}
+
 _up()
 {
-	veinfo ip link set dev "${IFACE}" up
-	ip link set dev "${IFACE}" up
+	_cmd ip link set dev "${IFACE}" up
 }
 
 _down()
 {
-	veinfo ip link set dev "${IFACE}" down
-	ip link set dev "${IFACE}" down
+	_cmd ip link set dev "${IFACE}" down
 }
 
 _exists()
@@ -59,8 +64,7 @@ _set_flag()
 		flag=${flag#-}
 		opt="off"
 	fi
-	veinfo ip link set dev "${IFACE}" "${flag}" "${opt}"
-	ip link set dev "${IFACE}" "${flag}" "${opt}"
+	_cmd ip link set dev "${IFACE}" "${flag}" "${opt}"
 }
 
 _get_mac_address()
@@ -82,8 +86,7 @@ _get_mac_address()
 
 _set_mac_address()
 {
-	veinfo ip link set dev "${IFACE}" address "$1"
-	ip link set dev "${IFACE}" address "$1"
+	_cmd ip link set dev "${IFACE}" address "$1"
 }
 
 _get_inet_addresses()
@@ -102,8 +105,7 @@ _get_inet_address()
 _add_address()
 {
 	if [ "$1" = "127.0.0.1/8" -a "${IFACE}" = "lo" ]; then
-		veinfo ip addr add "$@" dev "${IFACE}" 2>/dev/null
-		ip addr add "$@" dev "${IFACE}" 2>/dev/null
+		_cmd ip addr add "$@" dev "${IFACE}" 2>/dev/null
 		return 0
 	fi
 	local x
@@ -179,8 +181,7 @@ _add_address()
 
 	# This must appear on a single line, continuations cannot be used
 	set -- "${address}${netmask:+/}${netmask}" ${peer:+peer} ${peer} ${broadcast:+broadcast} ${broadcast} ${anycast:+anycast} ${anycast} ${label:+label} ${label} ${scope:+scope} ${scope} dev "${IFACE}" ${valid_lft:+valid_lft} $valid_lft ${preferred_lft:+preferred_lft} $preferred_lft $confflaglist
-	veinfo ip addr add "$@"
-	ip addr add "$@"
+	_cmd ip addr add "$@"
 	rc=$?
 	# Check return code in some cases
 	if [ $rc -ne 0 ]; then
@@ -251,8 +252,7 @@ _add_route()
 		fgrep -sq "${cmd%% *}"
 	route_already_exists=$?
 
-	veinfo ip ${family} route append ${cmd} dev "${IFACE}"
-	ip ${family} route append ${cmd} dev "${IFACE}"
+	_cmd ip ${family} route append ${cmd} dev "${IFACE}"
 	rc=$?
 	# Check return code in some cases
 	if [ $rc -ne 0 ]; then
@@ -278,13 +278,10 @@ _add_route()
 
 _delete_addresses()
 {
-	veinfo ip addr flush dev "${IFACE}" scope global 2>/dev/null
-	ip addr flush dev "${IFACE}" scope global 2>/dev/null
-	veinfo ip addr flush dev "${IFACE}" scope site 2>/dev/null
-	ip addr flush dev "${IFACE}" scope site 2>/dev/null
+	_cmd ip addr flush dev "${IFACE}" scope global 2>/dev/null
+	_cmd ip addr flush dev "${IFACE}" scope site 2>/dev/null
 	if [ "${IFACE}" != "lo" ]; then
-		veinfo ip addr flush dev "${IFACE}" scope host 2>/dev/null
-		ip addr flush dev "${IFACE}" scope host 2>/dev/null
+		_cmd ip addr flush dev "${IFACE}" scope host 2>/dev/null
 	fi
 	return 0
 }
@@ -294,10 +291,10 @@ _has_carrier()
 	LC_ALL=C ip link show dev "${IFACE}" | grep -q "LOWER_UP"
 }
 
+# Used by iproute2, ip6rd & ip6to4
 _tunnel()
 {
-	veinfo ip tunnel "$@"
-	ip tunnel "$@"
+	_cmd ip $FAMILY tunnel "$@"
 	rc=$?
 	# TODO: check return code in some cases
 	return $rc
@@ -349,8 +346,7 @@ _iproute2_policy_routing()
 				_ip_rule_runner -4 add "${rules}"
 			fi
 		fi
-		veinfo ip -4 route flush table cache dev "${IFACE}"
-		ip -4 route flush table cache dev "${IFACE}"
+		FAMILY="-4" IFACE="${IFACE}" _iproute2_route_flush
 	fi
 
 	# Kernel may not have IPv6 built in
@@ -365,8 +361,7 @@ _iproute2_policy_routing()
 				_ip_rule_runner -6 add "${rules}"
 			fi
 		fi
-		veinfo ip -6 route flush table cache dev "${IFACE}"
-		ip -6 route flush table cache dev "${IFACE}"
+		FAMILY="-6" IFACE="${IFACE}" _iproute2_route_flush
 	fi
 }
 
@@ -388,8 +383,7 @@ iproute2_pre_start()
 		esac
 
 		ebegin "Creating tunnel ${IFVAR}"
-		veinfo ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
-		ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
+		_cmd ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
 		eend $? || return 1
 		_up
 	fi
@@ -404,8 +398,7 @@ iproute2_pre_start()
 		esac
 
 		ebegin "Creating interface ${IFVAR}"
-		veinfo ip ${ipproto} link add "${IFACE}" ${link}
-		ip ${ipproto} link add "${IFACE}" ${link}
+		_cmd ip ${ipproto} link add "${IFACE}" ${link}
 		eend $? || return 1
 		_up
 	fi
@@ -414,16 +407,14 @@ iproute2_pre_start()
 	local mtu=
 	eval mtu=\$mtu_${IFVAR}
 	if [ -n "${mtu}" ]; then
-		veinfo ip link set dev "${IFACE}" mtu "${mtu}"
-		ip link set dev "${IFACE}" mtu "${mtu}"
+		_cmd ip link set dev "${IFACE}" mtu "${mtu}"
 	fi
 
 	# TX Queue Length support
 	local len=
 	eval len=\$txqueuelen_${IFVAR}
 	if [ -n "${len}" ]; then
-		veinfo ip link set dev "${IFACE}" txqueuelen "${len}"
-		ip link set dev "${IFACE}" txqueuelen "${len}"
+		_cmd ip link set dev "${IFACE}" txqueuelen "${len}"
 	fi
 
 	local policyroute_order=
@@ -436,16 +427,18 @@ iproute2_pre_start()
 
 _iproute2_tunnel_delete() {
 	ebegin "Destroying tunnel $1"
-	veinfo ip $2 tunnel del "$1"
-	ip $2 tunnel del "$1"
+	_tunnel del "$1"
 	eend $?
 }
 
 _iproute2_link_delete() {
 	ebegin "Destroying interface $1"
-	veinfo ip link del dev "$1"
-	ip link del dev "$1"
+	_cmd ip $FAMILY link del dev "$1"
 	eend $?
+}
+
+_iproute2_route_flush() {
+	_cmd ip $FAMILY route flush table cache dev "${IFACE}"
 }
 
 _iproute2_ipv6_tentative()
@@ -502,8 +495,7 @@ iproute2_post_stop()
 
 		# Only do something if the interface actually exist
 		if _exists; then
-			veinfo ip -4 route flush table cache dev "${IFACE}"
-			ip -4 route flush table cache dev "${IFACE}"
+			FAMILY="-4" IFACE="${IFACE}" _iproute2_route_flush
 		fi
 	fi
 
@@ -517,8 +509,7 @@ iproute2_post_stop()
 
 		# Only do something if the interface actually exist
 		if _exists; then
-			veinfo ip -6 route flush table cache dev "${IFACE}"
-			ip -6 route flush table cache dev "${IFACE}"
+			FAMILY="-6" IFACE="${IFACE}" _iproute2_route_flush
 		fi
 	fi
 
@@ -527,7 +518,7 @@ iproute2_post_stop()
 		if [ -n "$(ip tunnel show "${IFACE}" 2>/dev/null)" ]; then
 			_iproute2_tunnel_delete "${IFACE}"
 		elif  [ -n "$(ip -6 tunnel show "${IFACE}" 2>/dev/null)" ]; then
-			_iproute2_tunnel_delete "${IFACE}" -6
+			FAMILY=-6 _iproute2_tunnel_delete "${IFACE}"
 		fi
 
 		[ -n "$(ip link show "${IFACE}" type gretap 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
