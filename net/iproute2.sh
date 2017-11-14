@@ -463,7 +463,11 @@ iproute2_post_start()
 	# This block must be non-fatal, otherwise the interface will not be
 	# recorded as starting, and later services may be blocked.
 	if _iproute2_ipv6_tentative; then
-		einfon "Waiting for IPv6 addresses (${_dad_timeout} seconds) "
+		if [ "$EINFO_VERBOSE" = "yes" ]; then
+			veinfo "Found tentative addresses:"
+			LC_ALL=C ip -family inet6 addr show dev ${IFACE} tentative
+		fi
+		einfon "Waiting for tentative IPv6 addresses to complete DAD (${_dad_timeout} seconds) "
 		while [ $_dad_timeout -gt 0 ]; do
 			_iproute2_ipv6_tentative || break
 			sleep 1
