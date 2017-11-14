@@ -353,21 +353,24 @@ _gen_module_list()
 		visit "${MODULE}"
 	done
 
-	printf "" > "${MODULESLIST}"
+	# Create atomically
+	TMPMODULESLIST=${MODULESLIST}.$$
+	printf "" > "${TMPMODULESLIST}"
 	i=0
 	for MODULE in ${SORTED}; do
 		eval PROGRAM=\$${MODULE}_program
 		eval PROGRAM_START=\$${MODULE}_program_start
 		eval PROGRAM_STOP=\$${MODULE}_program_stop
 		eval PROVIDE=\$${MODULE}_provide
-		echo "module_${i}='${MODULE}'" >> "${MODULESLIST}"
-		echo "module_${i}_program='${PROGRAM}'" >> "${MODULESLIST}"
-		echo "module_${i}_program_start='${PROGRAM_START}'" >> "${MODULESLIST}"
-		echo "module_${i}_program_stop='${PROGRAM_STOP}'" >> "${MODULESLIST}"
-		echo "module_${i}_provide='${PROVIDE}'" >> "${MODULESLIST}"
+		echo "module_${i}='${MODULE}'" >> "${TMPMODULESLIST}"
+		echo "module_${i}_program='${PROGRAM}'" >> "${TMPMODULESLIST}"
+		echo "module_${i}_program_start='${PROGRAM_START}'" >> "${TMPMODULESLIST}"
+		echo "module_${i}_program_stop='${PROGRAM_STOP}'" >> "${TMPMODULESLIST}"
+		echo "module_${i}_provide='${PROVIDE}'" >> "${TMPMODULESLIST}"
 		: $(( i += 1 ))
 	done
-	echo "module_${i}=" >> "${MODULESLIST}"
+	echo "module_${i}=" >> "${TMPMODULESLIST}"
+	mv -f "${TMPMODULESLIST}" "${MODULESLIST}"
 	)
 
 	return 0
