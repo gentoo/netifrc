@@ -63,10 +63,11 @@ wpa_supplicant_pre_start()
 	eval opts=\$wpa_supplicant_${IFVAR}
 	eval cliopts=\$wpa_cli_${IFVAR}
 	[ -z "${cliopts}" ] && cliopts=${wpa_cli}
-	case " ${opts} " in
-		*" -Dwired "*) wireless=false;;
-		*) _is_wireless || return 0;;
-	esac
+	if echo " $opts " | grep -q " \-D[[:space:]]wired "; then
+		wireless=false
+	else
+		_is_wireless || return 0
+	fi
 
 	# We don't configure wireless if we're being called from
 	# the background unless we're not currently running
