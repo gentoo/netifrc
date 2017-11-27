@@ -63,11 +63,21 @@ wpa_supplicant_pre_start()
 	eval opts=\$wpa_supplicant_${IFVAR}
 	eval cliopts=\$wpa_cli_${IFVAR}
 	[ -z "${cliopts}" ] && cliopts=${wpa_cli}
-	if echo " $opts " | grep -q " \-D[[:space:]]wired "; then
-		wireless=false
-	else
-		_is_wireless || return 0
-	fi
+	set -- $opts
+	local opt_D
+	while [ ${#*} -gt 0 ]; do
+		local opt=$1 ; shift
+		case "$opt" in
+			-D) opt_D=${1} ; shift ;;
+			-D*) opt_D=${opt#-D} ;;
+			-N) eerror "Cannot use -N to wpa_supplicant for \$wpa_supplicant_${IFVAR}!" && return 1 ;;
+		esac
+	done
+	case "$opt_D" in
+		roboswitch) wireless=false ;;
+		wired) wireless=false ;;
+		*) _is_wireless || return 0;;
+	esac
 
 	# We don't configure wireless if we're being called from
 	# the background unless we're not currently running
