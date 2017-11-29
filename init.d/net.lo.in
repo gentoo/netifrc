@@ -118,6 +118,37 @@ _flatten_array()
 	_array_helper $1
 }
 
+_wait_for_presence()
+{
+	local timeout=
+	local rc=
+
+	_exists && return 0
+
+	eval timeout=\$presence_timeout_${IFVAR}
+	timeout=${timeout:-${presence_timeout:-0}}
+
+	[ ${timeout} -le 0 ] && return 1
+
+	einfon "Waiting for ${IFACE} to show up (${timeout} seconds)"
+	while [ ${timeout} -gt 0 ]; do
+		_exists
+		rc=$?
+		[ $rc -eq 0 ] && break
+
+		sleep 1
+		printf "."
+		: $(( timeout -= 1 ))
+	done
+
+	if [ ${timeout} -le 0 ]; then
+		_exists
+		rc=$?
+	fi
+	echo
+	eend $rc
+}
+
 _wait_for_carrier()
 {
 	local timeout=
@@ -618,7 +649,7 @@ start()
 		fi
 	done
 
-	if ! _exists; then
+	if ! _wait_for_presence; then
 		eerror "ERROR: interface ${IFACE} does not exist"
 		eerror "Ensure that you have loaded the correct kernel module for your hardware"
 		return 1
