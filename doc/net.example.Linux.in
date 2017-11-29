@@ -126,6 +126,22 @@
 # tables you may have to set a global metric as the due to a simple read of
 # the routing table taking over a minute at a time.
 
+# Sometimes you may want to wait for a particular interface to show up
+# when starting its service.
+# For example if a net.foo service is in the "default" runlevel so it
+# provides (or co-provides) the "net" service and it takes a while for the
+# "foo" interface to initialize and show up in the system during a boot this
+# will race with starting of net.foo service by the service manager - if the
+# interface hasn't shown up yet the service won't be able start (and so
+# will services that depend on it).
+# This setting specifies how long we wait for an interface to show up
+# in this case (in seconds).
+# The current default is 0 - we need an interface to be already present
+# in the system when its service is started.
+#presence_timeout=0
+# This setting can be also adjusted on a per-interface basis:
+#presence_timeout_eth0=10
+
 # Most drivers that report carrier status function correctly, but some do not
 # One of these faulty drivers is for the Intel e1000 network card, but only
 # at boot time. To get around this you may alter the carrier_timeout value for
