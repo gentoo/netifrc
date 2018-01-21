@@ -441,9 +441,13 @@ _iproute2_route_flush() {
 	_cmd ip $FAMILY route flush table cache dev "${IFACE}"
 }
 
+_iproute2_ipv6_tentative_output() {
+	LC_ALL=C ip -family inet6 addr show dev ${IFACE} tentative
+}
+
 _iproute2_ipv6_tentative()
 {
-	[ -n "$(LC_ALL=C ip -family inet6 addr show dev ${IFACE} tentative)" ] && return 0
+	[ -n "$(_iproute2_ipv6_tentative_output)" ] && return 0
 
 	return 1
 }
@@ -462,11 +466,15 @@ iproute2_post_start()
 
 	# This block must be non-fatal, otherwise the interface will not be
 	# recorded as starting, and later services may be blocked.
-	if _iproute2_ipv6_tentative; then
-		if [ "$EINFO_VERBOSE" = "yes" ]; then
-			veinfo "Found tentative addresses:"
-			LC_ALL=C ip -family inet6 addr show dev ${IFACE} tentative
-		fi
+	_iproute2_ipv6_tentative ; ret_tentative=$?
+	if [ $ret_tentative -eq 0 -a "$EINFO_VERBOSE" = "yes" ]; then
+		veinfo "Found tentative addresses:"
+		_iproute2_ipv6_tentative_output
+	fi
+	# This could be nested, but the conditionals are very deep at that point.
+	if [ $ret_tentative -eq 0 -a $_dad_timeout -le 0 ]; then
+		einfo "Not waiting for DAD timeout on tentative IPv6 addresses (per conf.d/net dad_timeout)"
+	elif [ $ret_tentative -eq 0 ]; then
 		einfon "Waiting for tentative IPv6 addresses to complete DAD (${_dad_timeout} seconds) "
 		while [ $_dad_timeout -gt 0 ]; do
 			_iproute2_ipv6_tentative || break
