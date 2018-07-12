@@ -1,4 +1,5 @@
-# Copyright (c) 2016 Gentoo Foundation
+# Copyright (c) 2016 Joakim Sindholt (zhasha)
+# Copyright (c) 2018 Jason A. Donenfeld,
 # Released under the 2-clause BSD license.
 
 wireguard_depend()
