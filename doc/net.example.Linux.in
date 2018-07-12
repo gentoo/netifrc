@@ -1214,6 +1214,15 @@
 # interfaces, you can do this here.
 #firewalld_zone_eth0="myzone"
 
+#-----------------------------------------------------------------------------
+# Wireguard support
+#
+# Wireguard can be configured either by passing a config file
+#wireguard_wg0="/path/to/file.conf"
+#
+# Wireguard can also be configured by passing explicit settings
+#wireguard_wg0="private-key /path/to/whatever listen-port 1234 peer ABCDEF= endpoint 1.2.3.4:2468"
+
 ##############################################################################
 # ADVANCED CONFIGURATION
 #
