@@ -5,6 +5,7 @@ Description=Gentoo Network Interface Management Scripts
 Type=oneshot
 ExecStart=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I start
 ExecStop=@LIBEXECDIR@/sh/systemd-wrapper.sh -i %I stop
+SuccessExitStatus=1
 RemainAfterExit=yes
 
 [Install]
