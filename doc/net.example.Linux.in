@@ -915,6 +915,30 @@
 #openvpn_tun1="--user foo --group bar"
 
 #-----------------------------------------------------------------------------
+# Virtual interface device (veth)
+# For veth support install iproute2 and awk
+#
+# The script uses "standard" ways of IP-address assignement in net.lo script. Network namespaces are not implemented here
+# because net.lo currently knows nothing about network namespaces.
+#
+#   You must specify veth interface type to avoid interference with "normal" interfaces startup
+#   The interface type must be set for both peers
+#type_veth0="veth"
+#   Here we declare peers for "ip link add" command
+#veth_veth0="veth0 veth1"
+#config_veth0="192.168.0.1/24"
+#
+#   Avoids race
+#rc_net_veth1_need="net.veth0"
+#type_veth1="veth"
+#   Both peers are created when the first one starts, we don't need to create the second peer
+#   explicitly, we just configure it
+#veth_veth1_create="no"
+#config_veth1="192.168.2.1/24"
+#
+
+
+#-----------------------------------------------------------------------------
 # Bridging (802.1d)
 # Preferred: iproute2, emerge sys-apps/iproute2
 # Legacy: brctl, emerge net-misc/bridge-utils
