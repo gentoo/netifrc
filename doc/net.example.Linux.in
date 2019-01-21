@@ -916,7 +916,7 @@
 
 #-----------------------------------------------------------------------------
 # Virtual interface device (veth)
-# For veth support install iproute2 and awk
+# For veth support install iproute2
 #
 # The script uses "standard" ways of IP-address assignement in net.lo script. Network namespaces are not implemented here
 # because net.lo currently knows nothing about network namespaces.
@@ -925,10 +925,11 @@
 #   The interface type must be set for both peers
 #type_veth0="veth"
 #   Here we declare peers for "ip link add" command
-#veth_veth0="veth0 veth1"
+#veth_veth0_peer1="veth0"
+#veth_veth0_peer2="veth1"
 #config_veth0="192.168.0.1/24"
 #
-#   Avoids race
+#   Prevents race
 #rc_net_veth1_need="net.veth0"
 #type_veth1="veth"
 #   Both peers are created when the first one starts, we don't need to create the second peer
