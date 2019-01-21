@@ -3,7 +3,7 @@
 
 veth_depend()
 {
-	program ip awk
+	program ip
 }
 
 _config_vars="$_config_vars veth"
@@ -72,19 +72,13 @@ _bring_peer_down()
 #Create and bring the veth pair up
 _create_peers()
 {
-	local peers
-	peers="$(_get_array "veth_${IFVAR}")"
+	local peer1
+	peer1="$(_get_array "veth_${IFVAR}_peer1")"
 
-	# veth has exactly two peers.
-	# For POSIX compatibility we evade bash arrays
-	local npeers
-	npeers=$(echo "$peers" | awk '{print NF}')
-	if [ "$npeers" != 2 ]; then
-		eerror "veth interface must have exactly two peers"
-		return 1
-	fi
+	local peer2
+	peer2="$(_get_array "veth_${IFVAR}_peer2")"
 
-	for x in ${peers}; do
+	for x in $peer1 $peer2; do
 		if _exists "$x" ; then
 			eerror "Interface $x already exists. Can't continue"
 			return 1
@@ -104,12 +98,6 @@ _create_peers()
 		return 1
 	fi
 
-	local peer1
-	peer1=$(echo "$peers" | awk '{print $1}')
-	local peer2
-	peer2=$(echo "$peers" | awk '{print $2}')
-
-	
 	ip link add "$peer1" type veth peer name "$peer2" > /dev/null 2>&1 || {
 		eerror "Can't create veth peer $peer1 or $peer2"
 		return 1
@@ -177,14 +165,13 @@ veth_post_stop()
 		return 0
 	fi
 
-	local peers
-	peers="$(_get_array "veth_${IFVAR}")"
-	local first
-	first=$(echo "$peers" | awk '{print $1}')
+	local peer1
+	peer1="$(_get_array "veth_${IFVAR}_peer1")"
+
 	local netns1
 	netns1="$(_get_array "veth_${IFVAR}_ns1")"
 
-	if ! _bring_peer_down "$first" "$netns1"
+	if ! _bring_peer_down "$peer1" "$netns1"
 	then
 		eerror "Can't delete the veth pair ${IFVAR}"
 		eend 1
