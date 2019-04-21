@@ -10,6 +10,7 @@ _config_vars="config metric routes"
 
 [ -z "${IN_BACKGROUND}" ] && IN_BACKGROUND="NO"
 
+# shellcheck disable=SC2034
 description="Configures network interfaces."
 
 # Handy var so we don't have to embed new lines everywhere for array splitting
@@ -20,6 +21,7 @@ __IFS="
 : ${INIT:=openrc}
 
 if [ -f "$SHDIR/functions.sh" ]; then
+	# shellcheck disable=SC1090
 	. "$SHDIR/functions.sh"
 else
 	echo "$SHDIR/functions.sh missing. Exiting"
@@ -345,6 +347,7 @@ _gen_module_list()
 
 	for MODULE in "${MODULESDIR}"/*.sh; do
 		sh -n "${MODULE}" || continue
+		# shellcheck disable=SC1090
 		. "${MODULE}" || continue
 		MODULE=${MODULE#${MODULESDIR}/}
 		MODULE=${MODULE%.sh}
@@ -414,8 +417,10 @@ _load_modules()
 
 	# Ensure our list is up to date
 	_gen_module_list false
+	# shellcheck disable=SC1090
 	if ! . "${MODULESLIST}"; then
 		_gen_module_list true
+		# shellcheck disable=SC1090
 		. "${MODULESLIST}"
 	fi
 
@@ -461,6 +466,7 @@ _load_modules()
 		MODULES="${MODULES}${MODULES:+ }${mod}"
 
 		# Now load and wrap our functions
+		# shellcheck disable=SC1090
 		if ! . "${MODULESDIR}/${mod}.sh"; then
 			eend 1 "${RC_SVCNAME}: error loading module \`${mod}'"
 			exit 1
