@@ -34,10 +34,11 @@ MODULESLIST="${RC_SVCDIR}/nettree$(get_interface)"
 
 depend()
 {
-	local IFACE=$(get_interface)
-	local IFVAR=$(shell_var "${IFACE}")
+	local IFACE IFVAR
+	IFACE=$(get_interface)
+	IFVAR=$(shell_var "${IFACE}")
 
-	if [ "$RC_UNAME" = Linux -a "$IFACE" != lo ]; then
+	if [ "$RC_UNAME" = Linux ] && [ "$IFACE" != lo ]; then
 		need sysfs
 		after modules
 	fi
@@ -54,14 +55,14 @@ depend()
 	esac
 
 	if [ "$(command -v "depend_${IFVAR}")" = "depend_${IFVAR}" ]; then
-		depend_${IFVAR}
+		"depend_${IFVAR}"
 	fi
 
-	local dep= prov=
+	local dep prov
 	for dep in need use before after provide keyword; do
 		eval prov=\$rc_${dep}_${IFVAR}
 		if [ -n "${prov}" ]; then
-			${dep} ${prov}
+			"${dep}" "${prov}"
 			ewarn "rc_${dep}_${IFVAR} is deprecated."
 			ewarn "Please use rc_net_${IFVAR}_${dep} instead."
 		fi
