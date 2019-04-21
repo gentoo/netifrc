@@ -83,6 +83,7 @@ _get_array()
 {
 	local _a=
 	if [ -n "${BASH}" ]; then
+		# shellcheck disable=SC2039
 		case "$(declare -p "$1" 2>/dev/null)" in
 			"declare -a "*)
 				ewarn "You are using a bash array for $1."
@@ -104,6 +105,7 @@ _get_array()
 _flatten_array()
 {
 	if [ -n "${BASH}" ]; then
+		# shellcheck disable=SC2039
 		case "$(declare -p "$1" 2>/dev/null)" in
 			"declare -a "*)
 				ewarn "You are using a bash array for $1."
@@ -111,6 +113,7 @@ _flatten_array()
 				ewarn "Please see net.example for the correct format for $1."
 				eval "set -- \"\${$1[@]}\""
 				for x; do
+					# shellcheck disable=SC2059
 					printf "'%s' " "$(printf "$x" | sed "s:':'\\\'':g")"
 				done
 				return 0
@@ -194,6 +197,7 @@ _netmask2cidr()
 			quad=${quad}${quad:+.}0x${hex%${lastbut2}*}
 			hex=${lastbut2}
 		done
+		# shellcheck disable=SC2086
 		set -- ${quad}
 		;;
 	esac
@@ -427,6 +431,7 @@ _load_modules()
 	MODULES=
 	if [ "${IFACE}" != "lo" -a "${IFACE}" != "lo0" ]; then
 		eval mymods=\$modules_${IFVAR}
+		# shellcheck disable=SC2154
 		[ -z "${mymods}" ] && mymods=${modules}
 	fi
 
@@ -627,6 +632,7 @@ start()
 	local IFVAR=$(shell_var "${IFACE}") cmd= our_metric=
 	local metric=0 _up_before_preup
 	eval _up_before_preup="\$up_before_preup_${IFVAR}"
+	# shellcheck disable=SC2154
 	[ -z "${_up_before_preup}" ] && _up_before_preup=$up_before_preup
 
 	einfo "Bringing up interface ${IFACE}"
