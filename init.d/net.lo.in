@@ -530,8 +530,9 @@ _load_modules()
 
 _load_config()
 {
-	local config="$(_get_array "config_${IFVAR}")"
-	local fallback="$(_get_array fallback_${IFVAR})"
+	local config='' fallback=''
+	config="$(_get_array "config_${IFVAR}")"
+	fallback="$(_get_array fallback_${IFVAR})"
 
 	config_index=0
 	local IFS="$__IFS"
@@ -545,7 +546,7 @@ _load_config()
 		# Of course, we may have a single address added old style.
 		# If the NEXT argument is a v4 or v6 address, it's the next config.
 		# Otherwise, it's arguments to the first config...
-		if [ "${2#*.*}" = "${2}" -a "${2#*:*}" = "${2}" ]; then
+		if [ "${2#*.*}" = "${2}" ] && [  "${2#*:*}" = "${2}" ]; then
 			# Not an IPv4/IPv6
 			local IFS="$__IFS"
 			set -- ${config}
@@ -553,7 +554,7 @@ _load_config()
 	fi
 
 	# Ensure that loopback has the correct address
-	if [ "${IFACE}" = "lo" -o "${IFACE}" = "lo0" ]; then
+	if [ "${IFACE}" = "lo" ] || [ "${IFACE}" = "lo0" ]; then
 		if [ "$1" != "null" ]; then
 		   	config_0="127.0.0.1/8"
 			config_index=1
