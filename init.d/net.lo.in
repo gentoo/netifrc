@@ -203,7 +203,7 @@ _netmask2cidr()
 		;;
 	esac
 
-	local i= len=
+	local i='' len=''
 	local IFS=.
 	for i in $1; do
 		case $i in
@@ -220,7 +220,7 @@ _netmask2cidr()
 
 _configure_variables()
 {
-	local var= v= t=
+	local var='' v='' t=''
 
 	for var in ${_config_vars}; do
 		local v=
