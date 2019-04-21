@@ -82,7 +82,7 @@ _array_helper()
 
 _get_array()
 {
-	local _a=
+	local _a=''
 	if [ -n "${BASH}" ]; then
 		# shellcheck disable=SC2039
 		case "$(declare -p "$1" 2>/dev/null)" in
@@ -99,7 +99,7 @@ _get_array()
 		esac
 	fi
 
-	_array_helper $1
+	_array_helper "$1"
 }
 
 # Flatten bash arrays to simple strings
@@ -122,7 +122,7 @@ _flatten_array()
 		esac
 	fi
 
-	_array_helper $1
+	_array_helper "$1"
 }
 
 _wait_for_presence()
