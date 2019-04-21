@@ -632,9 +632,17 @@ is_interface_type()
 
 start()
 {
-	local IFACE=$(get_interface) oneworked=false fallback=false module=
-	local IFVAR=$(shell_var "${IFACE}") cmd= our_metric=
-	local metric=0 _up_before_preup
+	local IFACE=''
+	local IFVAR=''
+	local oneworked=false
+	local fallback=false
+	local module=''
+	local cmd=''
+	local our_metric=''
+	local metric=0
+	local _up_before_preup=''
+	IFACE=$(get_interface)
+	IFVAR=$(shell_var "${IFACE}")
 	eval _up_before_preup="\$up_before_preup_${IFVAR}"
 	# shellcheck disable=SC2154
 	[ -z "${_up_before_preup}" ] && _up_before_preup=$up_before_preup
@@ -682,14 +690,14 @@ start()
 		return 1
 	fi
 
-	local config= config_index=
+	local config='' config_index=''
 	_load_config
 	config_index=0
 
 	eval our_metric=\$metric_${IFVAR}
 	if [ -n "${our_metric}" ]; then
 		metric=${our_metric}
-	elif [ "${IFACE}" != "lo" -a "${IFACE}" != "lo0" ]; then
+	elif [ "${IFACE}" != "lo" ] && [ "${IFACE}" != "lo0" ]; then
 		: $(( metric += $(_ifindex) ))
 	fi
 
@@ -698,7 +706,7 @@ start()
 		[ -z "${config}" ] && break
 
 		set -- ${config}
-		if [ "$1" != "null" -a "$1" != "noop" ]; then
+		if [ "$1" != "null" ] && [ "$1" != "noop" ]; then
 			ebegin "$1"
 		fi
 		eindent
@@ -754,7 +762,7 @@ start()
 	if [ -z "${routes}" ]; then
 		routes="$(_get_array "routes_${IFVAR}")"
 	fi
-	if [ "${IFACE}" = "lo" -o "${IFACE}" = "lo0" ]; then
+	if [ "${IFACE}" = "lo" ] || [ "${IFACE}" = "lo0" ]; then
 		if [ "${config_0}" != "null" ]; then
 			routes="127.0.0.0/8 via 127.0.0.1
 ${routes}"
@@ -780,11 +788,11 @@ ${routes}"
 		ebegin ${cmd}
 		# Work out if we're a host or a net if not told
 		case ${cmd} in
-			-net" "*|-host" "*);;
-			*" "netmask" "*)                   cmd="-net ${cmd}";;
+			-net\ *|-host\ *);;
+			*\ netmask\ *)                     cmd="-net ${cmd}";;
 			*.*.*.*/32*)                       cmd="-host ${cmd}";;
-			*.*.*.*/*|0.0.0.0|0.0.0.0" "*)     cmd="-net ${cmd}";;
-			default|default" "*)               cmd="-net ${cmd}";;
+			*.*.*.*/*|0.0.0.0|0.0.0.0\ *)     cmd="-net ${cmd}";;
+			default|default\ *)               cmd="-net ${cmd}";;
 			*:*/128*)                          cmd="-host ${cmd}";;
 			*:*/*)                             cmd="-net ${cmd}";;
 			*)                                 cmd="-host ${cmd}";;
