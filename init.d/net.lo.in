@@ -830,14 +830,16 @@ stop()
 	# correctly if we go back to multiuser.
 	yesno ${keep_network:-YES} && yesno $RC_GOINGDOWN && return 0
 
-	local IFACE=$(get_interface) module=
-	local IFVAR=$(shell_var "${IFACE}") opts=
+	local IFACE='' module=''
+	local IFVAR=''
+	IFACE=$(get_interface)
+	IFVAR=$(shell_var "${IFACE}")
 
 	einfo "Bringing down interface ${IFACE}"
 	eindent
 
 	if [ -z "${MODULES}" ]; then
-		local MODULES=
+		local MODULES=''
 		_load_modules false
 	fi
 
@@ -883,7 +885,7 @@ stop()
 	# If not in background, and not loopback then bring the interface down
 	# unless overridden.
 	if ! yesno ${IN_BACKGROUND} && \
-	[ "${IFACE}" != "lo" -a "${IFACE}" != "lo0" ]; then
+	[ "${IFACE}" != "lo" ] && [ "${IFACE}" != "lo0" ]; then
 		eval module=\$ifdown_${IFVAR}
 		module=${module:-${ifdown:-YES}}
 		yesno ${module} && _down 2>/dev/null
