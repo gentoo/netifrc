@@ -430,13 +430,13 @@ _load_modules()
 	fi
 
 	MODULES=
-	if [ "${IFACE}" != "lo" -a "${IFACE}" != "lo0" ]; then
+	if [ "${IFACE}" != "lo" ] && [ "${IFACE}" != "lo0" ]; then
 		eval mymods=\$modules_${IFVAR}
 		# shellcheck disable=SC2154
 		[ -z "${mymods}" ] && mymods=${modules}
 	fi
 
-	local i=-1 x= mod= f= provides=
+	local i=-1 x='' mod='' f='' provides=''
 	while true; do
 		: $(( i += 1 ))
 		eval mod=\$module_${i}
@@ -446,7 +446,7 @@ _load_modules()
 		eval set -- \$module_${i}_program
 		if [ -n "$1" ]; then
 			if ! _program_available "$@" >/dev/null; then
-				vewarn "Skipping module $mod due to missing program: $@"
+				vewarn "Skipping module $mod due to missing program: $*"
 				continue
 			fi
 		fi
@@ -457,7 +457,7 @@ _load_modules()
 		fi
 		if [ -n "$1" ]; then
 			if ! _program_available "$@" >/dev/null; then
-				vewarn "Skipping module $mod due to missing program: $@"
+				vewarn "Skipping module $mod due to missing program: $*"
 				continue
 			fi
 		fi
@@ -483,7 +483,8 @@ _load_modules()
 		# Wrap our provides
 		local f=
 		for f in pre_start start post_start; do
-			eval "${provides}_${f}() { [ "$(command -v "${mod}_${f}")" = "${mod}_${f}" ] || return 0; ${mod}_${f} \"\$@\"; }"
+			inner=$(command -v "${mod}_${f}")
+			eval "${provides}_${f}() { [ '${inner}' = '${mod}_${f}' ] || return 0; ${mod}_${f} \"\$@\"; }"
 		done
 
 		eval module_${mod}_provides="${provides}"
@@ -497,7 +498,8 @@ _load_modules()
 			eval x=\$module_${mod}_provides
 			[ -z "${x}" ] && continue
 			for f in pre_start start post_start; do
-				eval "${x}_${f}() { [ "$(command -v "${mod}_${f}")" = "${mod}_${f}" ] || return 0; ${mod}_${f} \"\$@\"; }"
+				inner=$(command -v "${mod}_${f}")
+				eval "${x}_${f}() { [ '${inner}' = '${mod}_${f}' ] || return 0; ${mod}_${f} \"\$@\"; }"
 			done
 			eval module_${x}_providedby="${mod}"
 			;;
