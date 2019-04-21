@@ -243,7 +243,7 @@ _which()
 	OIFS="$IFS"
 	IFS=:
 	for i in $PATH ; do
-		[ -x $i/$1 ] && echo $i/$1 && break
+		[ -x "$i/$1" ] && echo "$i/$1" && break
 	done
 	IFS=$OIFS
 }
