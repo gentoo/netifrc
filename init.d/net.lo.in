@@ -18,7 +18,7 @@ __IFS="
 "
 
 #  Set the INIT to be openrc if this file is called directly
-: ${INIT:=openrc}
+: "${INIT:=openrc}"
 
 if [ -f "$SHDIR/functions.sh" ]; then
 	# shellcheck disable=SC1090
