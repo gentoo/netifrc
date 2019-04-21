@@ -369,14 +369,14 @@ _gen_module_list()
 		VISITED="${VISITED} $1"
 
 		eval AFTER=\$${1}_after
-		for MODULE in ${AFTER}; do
-			eval PROVIDEDBY=\$${MODULE}_providedby
+		for MODULE1 in ${AFTER}; do
+			eval PROVIDEDBY=\$${MODULE1}_providedby
 			if [ -n "${PROVIDEDBY}" ]; then
-				for MODULE in ${PROVIDEDBY}; do
-					visit "${MODULE}"
+				for MODULE2 in ${PROVIDEDBY}; do
+					visit "${MODULE2}"
 				done
 			else
-				visit "${MODULE}"
+				visit "${MODULE1}"
 			fi
 		done
 
