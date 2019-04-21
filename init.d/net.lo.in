@@ -300,11 +300,11 @@ _get_errorhandler_behavior() {
 # Basically sorts our modules into order and saves the list
 _gen_module_list()
 {
-	local x= f= force=$1
+	local x='' f='' force="$1"
 	if ! ${force} ; then
-		if [ -s "${MODULESLIST}" -a "${MODULESLIST}" -nt /proc/$$/status ]; then
+		if [ -s "${MODULESLIST}" ] && [ "${MODULESLIST}" -nt /proc/$$/status ]; then
 			ewarn "Discarding cached module list ($MODULESLIST) as it's newer current time!"
-		elif [ -s "${MODULESLIST}" -a "${MODULESLIST}" -nt "${MODULESDIR}" ]; then
+		elif [ -s "${MODULESLIST}" ] && [ "${MODULESLIST}" -nt "${MODULESDIR}" ]; then
 			local update=false
 			for x in "${MODULESDIR}"/*.sh; do
 				[ -e "${x}" ] || continue
@@ -333,7 +333,7 @@ _gen_module_list()
 	}
 
 	program() {
-		if [ "$1" = "start" -o "$1" = "stop" ]; then
+		if [ "$1" = "start" ] || [ "$1" = "stop" ]; then
 			local s="$1"
 			shift
 			eval ${MODULE}_program_${s}="\"\${${MODULE}_program_${s}}\${${MODULE}_program_${s}:+ }$*\""
@@ -345,7 +345,7 @@ _gen_module_list()
 	provide() {
 		eval ${MODULE}_provide="\"\${${MODULE}_provide}\${${MODULE}_provide:+ }$*\""
 		local x
-		for x in $*; do
+		for x in "$@"; do
 			eval ${x}_providedby="\"\${${MODULE}_providedby}\${${MODULE}_providedby:+ }${MODULE}\""
 		done
 	}
@@ -356,7 +356,7 @@ _gen_module_list()
 		. "${MODULE}" || continue
 		MODULE=${MODULE#${MODULESDIR}/}
 		MODULE=${MODULE%.sh}
-		eval ${MODULE}_depend
+		eval "${MODULE}_depend"
 		MODULES="${MODULES} ${MODULE}"
 	done
 
@@ -402,13 +402,13 @@ _gen_module_list()
 		eval PROGRAM_START=\$${MODULE}_program_start
 		eval PROGRAM_STOP=\$${MODULE}_program_stop
 		eval PROVIDE=\$${MODULE}_provide
-		echo "module_${i}='${MODULE}'" >> "${TMPMODULESLIST}"
-		echo "module_${i}_program='${PROGRAM}'" >> "${TMPMODULESLIST}"
-		echo "module_${i}_program_start='${PROGRAM_START}'" >> "${TMPMODULESLIST}"
-		echo "module_${i}_program_stop='${PROGRAM_STOP}'" >> "${TMPMODULESLIST}"
-		echo "module_${i}_provide='${PROVIDE}'" >> "${TMPMODULESLIST}"
+		echo "module_${i}='${MODULE}'"
+		echo "module_${i}_program='${PROGRAM}'"
+		echo "module_${i}_program_start='${PROGRAM_START}'"
+		echo "module_${i}_program_stop='${PROGRAM_STOP}'"
+		echo "module_${i}_provide='${PROVIDE}'"
 		: $(( i += 1 ))
-	done
+	done >> "${TMPMODULESLIST}"
 	echo "module_${i}=" >> "${TMPMODULESLIST}"
 	mv -f "${TMPMODULESLIST}" "${MODULESLIST}"
 	)
