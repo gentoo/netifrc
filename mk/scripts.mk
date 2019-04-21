@@ -14,6 +14,8 @@ _LCL_SED:=		$(shell ${_LCL_SED_SH})
 
 SED_REPLACE=		-e 's:@SHELL@:${SH}:g' -e 's:@LIB@:${LIBNAME}:g' -e 's:@SYSCONFDIR@:${SYSCONFDIR}:g' -e 's:@CONFDIR@:${CONFDIR}:g' -e 's:@LIBEXECDIR@:${LIBEXECDIR}:g' -e 's:@PREFIX@:${PREFIX}:g' -e 's:@BINDIR@:${BINDIR}:g' -e 's:@SBINDIR@:${SBINDIR}:g' -e 's:@INITDIR@:${INITDIR}:g' ${_PKG_SED} ${_LCL_SED}
 
+SHELLCHECK_CMD = shellcheck -s sh --exclude SC1008 -f gcc
+
 # Tweak our shell scripts
 %.sh: %.sh.in
 	${SED} ${SED_REPLACE} ${SED_EXTRA} $< > $@
@@ -54,5 +56,8 @@ check test::
 CLEANFILES+=	${OBJS}
 clean:
 	@if test -n "${CLEANFILES}"; then echo "rm -f ${CLEANFILES}"; rm -f ${CLEANFILES}; fi
+
+shellcheck: ${SRCS}
+	@$(SHELLCHECK_CMD) $<
 
 include ${MK}/gitignore.mk

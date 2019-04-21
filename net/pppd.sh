@@ -1,6 +1,7 @@
 # Copyright (c) 2005-2007 Gentoo Foundation
 # Copyright (c) 2007-2008 Roy Marples <roy@marples.name>
 # Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 pppd_depend()
 {

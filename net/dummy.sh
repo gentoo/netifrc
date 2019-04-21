@@ -1,5 +1,6 @@
 # Copyright (c) 2015 Gentoo Foundation
 # All rights reserved. Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 dummy_depend()
 {

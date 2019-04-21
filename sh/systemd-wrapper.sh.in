@@ -1,4 +1,5 @@
 #!/bin/sh
+# shellcheck shell=sh disable=SC1008
 
 CONFDIR="@CONFDIR@"
 LIBEXECDIR="@LIBEXECDIR@/sh"

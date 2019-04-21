@@ -1,5 +1,6 @@
 # Copyright (c) 2005-2007 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
+# shellcheck shell=sh disable=SC1008
 
 clip_depend()
 {

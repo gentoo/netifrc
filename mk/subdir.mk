@@ -29,3 +29,5 @@ depend:
 	${_SUBDIR}
 ignore:
 	${_SUBDIR}
+shellcheck:
+	${_SUBDIR}

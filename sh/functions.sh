@@ -1,5 +1,6 @@
 # Compatibility layer for netifrc to work with multiple init
 # systems.
+# shellcheck shell=sh disable=SC1008
 
 # First check whether e* commands are present in the environment
 if [ x$RC_GOT_FUNCTIONS = xyes -o -n "$(command -v ebegin 2>/dev/null)" ]; then

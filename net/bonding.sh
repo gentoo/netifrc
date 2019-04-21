@@ -1,6 +1,7 @@
 # Copyright (c) 2007-2008 Roy Marples <roy@marples.name>
 #               2017      Marc Schiffbauer <mschiff@gentoo.org>
 # Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 bonding_depend()
 {

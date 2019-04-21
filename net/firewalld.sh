@@ -1,5 +1,6 @@
 # Copyright (c) 2012 Doug Goldstein <cardoe@cardoe.com>
 # Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 firewalld_depend()
 {

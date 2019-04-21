@@ -1,6 +1,7 @@
 # Copyright (c) 2016 Brian Evans <grknight@gentoo.org>
 # Based on iwconfig.sh Copyright (c) 2007-2008 Roy Marples <roy@marples.name>
 # Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 _config_vars="$_config_vars ssid mode associate_timeout sleep_scan"
 _config_vars="$_config_vars preferred_aps blacklist_aps"

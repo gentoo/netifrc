@@ -1,5 +1,6 @@
 # Copyright (c) 2016 Emeric Verschuur <emeric@mbedsys.org>
 # All rights reserved. Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 l2tp_depend()
 {

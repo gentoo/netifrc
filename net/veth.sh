@@ -1,5 +1,6 @@
 # Copyright (c) 2018 
 # Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 veth_depend()
 {

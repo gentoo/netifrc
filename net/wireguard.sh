@@ -1,6 +1,7 @@
 # Copyright (c) 2016 Joakim Sindholt (zhasha)
 # Copyright (c) 2018 Jason A. Donenfeld,
 # Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 wireguard_depend()
 {

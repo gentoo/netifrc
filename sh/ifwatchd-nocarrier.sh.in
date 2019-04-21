@@ -1,5 +1,6 @@
 #!@SHELL@
 # Wrapper for ifwatchd(8)
+# shellcheck shell=sh disable=SC1008
 
 IN_BACKGROUND=yes ; export IN_BACKGROUND
 $RC_SERVICE --quiet stop

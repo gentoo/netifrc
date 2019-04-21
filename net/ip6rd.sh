@@ -1,5 +1,6 @@
 # Copyright (c) 2011 by Gentoo Foundation
 # Released under the 2-clause BSD license.
+# shellcheck shell=sh disable=SC1008
 
 _config_vars="$_config_vars link prefix suffix ipv4mask relay"
 
