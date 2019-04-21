@@ -594,7 +594,7 @@ _run_if()
 {
 	local cmd=$1 iface=$2 ifr=${IFACE} ifv=${IFVAR}
 	# Ensure that we don't stamp on real values
-	local IFACE= IFVAR=
+	local IFACE='' IFVAR=''
 	shift
 	if [ -n "${iface}" ]; then
 		IFACE="${iface}"
