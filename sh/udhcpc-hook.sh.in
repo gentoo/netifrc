@@ -68,7 +68,7 @@ update_classless_routes()
 		max_routes=128
 		metric=
 		[ -n "${IF_METRIC}" ] && metric="metric ${IF_METRIC}"
-		while [ -n "$1" -a -n "$2" -a $max_routes -gt 0 ]; do
+		while [ -n "$1" ] && [ -n "$2" ] && [ $max_routes -gt 0 ]; do
 			gw_arg=
 			if [ "$2" != '0.0.0.0' ]; then
 				gw_arg="gw $2"
@@ -76,7 +76,7 @@ update_classless_routes()
 
 			[ ${1##*/} -eq 32 ] && type=host || type=net
 			route add -$type "$1" ${gw_arg} ${metric} dev "${interface}"
-			max=$(($max-1))
+			max=$((max-1))
 			shift 2
 		done
 	fi
@@ -90,7 +90,7 @@ update_routes()
 
 	# If the DHCP server returns both a Classless Static Routes option and
 	# a Router option, the DHCP client MUST ignore the Router option.
-	if [ -n "${router}" -a -z "${staticroutes}" ] ; then
+	if [ -n "${router}" ] && [ -z "${staticroutes}" ] ; then
 		metric=
 		[ -n "${IF_METRIC}" ] && metric="metric ${IF_METRIC}"
 		for i in ${router} ; do
@@ -115,6 +115,7 @@ deconfig()
 }
 
 if [ -r "/run/udhcpc-${interface}.conf" ]; then
+	# shellcheck disable=SC1090
 	. "/run/udhcpc-${interface}.conf"
 fi
 
