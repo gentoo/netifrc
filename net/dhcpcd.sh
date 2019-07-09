@@ -8,8 +8,8 @@ dhcpcd_depend()
 	program start dhcpcd
 	provide dhcp
 
-	# We prefer dhcpcd over the others
-	after dhclient pump udhcpc
+	# We prefer dhcpcd over these
+	after udhcpc pump dhclient
 }
 
 _config_vars="$_config_vars dhcp dhcpcd"

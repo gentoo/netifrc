@@ -7,6 +7,9 @@ pump_depend()
 	program /sbin/pump
 	after interface
 	provide dhcp
+
+	# We prefer pump over udhcpc
+	after udhcpc
 }
 
 _config_vars="$_config_vars dhcp pump"

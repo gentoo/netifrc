@@ -7,6 +7,9 @@ dhclient_depend()
 	after interface
 	program start /sbin/dhclient
 	provide dhcp
+
+	# We prefer dhclient over these
+	after udhcpc pump
 }
 
 _config_vars="$_config_vars dhcp dhcpcd"
