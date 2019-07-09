@@ -12,8 +12,8 @@ iw_depend()
 	after plug
 	before interface
 	provide wireless
-        # Prefer us over iwconfig
-        after iwconfig
+	# Prefer us over iwconfig
+	after iwconfig
 }
 
 _get_ssid()
