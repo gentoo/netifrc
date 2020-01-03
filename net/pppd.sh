@@ -21,6 +21,32 @@ requote()
 	printf "'%s' " "$@"
 }
 
+pppd_is_ge_248()
+{
+	local ver_str="$(/usr/sbin/pppd --version 2>&1 | grep -o '[[:digit:]\.]\+')"
+	local maj_ver="$(echo ${ver_str} | cut -d . -f 1)"
+	local min_ver="$(echo ${ver_str} | cut -d . -f 2)"
+	local patch_ver="$(echo ${ver_str} | cut -d . -f 3)"
+
+	if [ "${maj_ver}" -gt 2 ] ; then
+		return 0
+	elif [ "${maj_ver}" -eq 2 ] ; then
+		if [ "${min_ver}" -gt 4 ] ; then
+			return 0
+		elif [ "${min_ver}" -eq 4 ] ; then
+			if [ "${patch_ver}" -ge 8 ] ; then
+				return 0
+			else
+				return 1
+			fi
+		else
+			return 1
+		fi
+	else
+		return 1
+	fi
+}
+
 pppd_pre_start()
 {
 	# Interface has to be called ppp
@@ -39,7 +65,10 @@ pppd_pre_start()
 		return 0
 	fi
 
-	local link= i= unit="${IFACE#ppp}" opts=
+	local link= i= unit="${IFACE#ppp}" opts= routemetric=defaultmetric
+
+	# https://github.com/paulusmack/ppp/commit/35e5a569c988b1ff865b02a24d9a727a00db4da9
+	pppd_is_ge_248 && routemetric=defaultroute-metric
 
 	# PPP requires a link to communicate over - normally a serial port
 	# PPPoE communicates over Ethernet
@@ -76,6 +105,7 @@ pppd_pre_start()
 				return 1
 			;;
 			defaultmetric) hasdefaultmetric=true;;
+			defaultroute-metric) hasdefaultmetric=true;;
 			mtu) hasmtu=true;;
 			mru) hasmru=true;;
 			maxfail) hasmaxfail=true;;
@@ -98,7 +128,7 @@ pppd_pre_start()
 		local m=
 		eval m=\$metric_${IFVAR}
 		[ -z "${m}" ] && : $(( m = metric + $(_ifindex) ))
-		opts="${opts} defaultmetric ${m}"
+		opts="${opts} ${routemetric} ${m}"
 	fi
 	if [ -n "${mtu}" ]; then
 		${hasmtu} || opts="${opts} mtu ${mtu}"
