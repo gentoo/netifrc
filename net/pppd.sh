@@ -163,7 +163,7 @@ pppd_pre_start()
 	# We need to flatten the useless array
 	set -- $(_get_array "chat_${IFVAR}")
 	if [ $# != 0 ]; then
-		opts="${opts} connect '$(echo ${chatprog} $@ | sed -e "s:':'\\\\'':g")'"
+		opts="${opts} connect '$(echo ${chatprog} "$@" | sed -e "s:':'\\\\'':g")'"
 	fi
 
 	# Add plugins

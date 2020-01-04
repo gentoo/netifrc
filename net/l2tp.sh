@@ -81,7 +81,7 @@ _l2tp_get_tunnel_info() {
 
 _ip_l2tp_add() {
 	local e
-	e="$(LC_ALL=C ip l2tp add $@ 2>&1 1>/dev/null)"
+	e="$(LC_ALL=C ip l2tp add "$@" 2>&1 1>/dev/null)"
 	case $e in
 		"")
 			return 0
