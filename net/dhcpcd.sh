@@ -16,11 +16,14 @@ _config_vars="$_config_vars dhcp dhcpcd"
 
 dhcpcd_start()
 {
-	# check for pidfile after we gathered the user's opts because they can
+	# check for pidfile after we gathered the user's args because they can
 	# alter the pidfile's name (#718114)
-	local args= opt= pidfile= opts= new=true
+	# Save the args into a file so dhcpcd_stop can later re-use the very
+	# same args later.
+	local args= opt= pidfile= opts= new=true argsfile=/run/netifrc_dhcpcd_${IFACE}_args
 	eval args=\$dhcpcd_${IFVAR}
 	[ -z "${args}" ] && args=${dhcpcd}
+	echo "${args}" > ${argsfile}
 	pidfile="$(dhcpcd -P ${args} ${IFACE})"
 
 	# Get our options
@@ -78,12 +81,16 @@ dhcpcd_start()
 
 dhcpcd_stop()
 {
-	local args= pidfile= opts= sig=SIGTERM
+	local args= pidfile= opts= sig=SIGTERM argsfile=/run/netifrc_dhcpcd_${IFACE}_args
 
-	# check for pidfile after we gathered the user's opts because they can
+	# check for pidfile after we gathered the user's args because they can
 	# alter the pidfile's name (#718114)
-	eval args=\$dhcpcd_${IFVAR}
-	[ -z "${args}" ] && args=${dhcpcd}
+	if [ -f "${argsfile}" ] ; then
+		args="$(cat ${argsfile})"
+	else
+		eval args=\$dhcpcd_${IFVAR}
+		[ -z "${args}" ] && args=${dhcpcd}
+	fi
 	pidfile="$(dhcpcd -P ${args} ${IFACE})"
 	[ ! -f "${pidfile}" ] && return 0
 
@@ -94,5 +101,6 @@ dhcpcd_stop()
 		*" release "*) dhcpcd -k "${IFACE}" ;;
 		*) dhcpcd -x "${IFACE}" ;;
 	esac
+	[ -f "${argsfile}" ] && rm -f "${argsfile}"
 	eend $?
 }
