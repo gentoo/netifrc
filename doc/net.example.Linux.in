@@ -664,6 +664,9 @@
 # MAC-VLAN mode (private, vepa, bridge, passtru)
 #mode_macvlan0="private"
 
+# MAC-VLAN type (macvlan, macvtap)
+#type_macvlan0="macvtap"
+
 # IP address, MAC address, ... are configured as a normal interface
 #config_macvlan0="192.168.20.20/24"
 #mac_macvlan0="00:50:06:20:20:20"
