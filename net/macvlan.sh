@@ -34,8 +34,12 @@ macvlan_pre_start()
 	eval mode=\$mode_${IFVAR}
 	[ -z "${mode}" ] && mode="private"
 
+	local type=
+	eval type=\$type_${IFVAR}
+	[ -z "${type}" ] && type="macvlan"
+
 	ebegin "Creating MAC-VLAN ${IFACE} to ${macvlan}"
-	e="$(ip link add link "${macvlan}" name "${IFACE}" type macvlan mode "${mode}" 2>&1 1>/dev/null)"
+	e="$(ip link add link "${macvlan}" name "${IFACE}" type "${type}" mode "${mode}" 2>&1 1>/dev/null)"
 	if [ -n "${e}" ]; then
 		eend 1 "${e}"
 	else
@@ -49,6 +53,6 @@ macvlan_post_stop()
 	_is_macvlan || return 0
 
 	ebegin "Removing MAC-VLAN ${IFACE}"
-	ip link delete "${IFACE}" type macvlan >/dev/null
+	ip link delete "${IFACE}" >/dev/null
 	eend $?
 }
