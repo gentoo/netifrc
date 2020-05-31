@@ -438,8 +438,18 @@ _iproute2_link_delete() {
 	eend $?
 }
 
+_iproute2_route_flush_supported() {
+	case $FAMILY in
+		-6) p='/proc/sys/net/ipv6/route/flush' ;;
+		-4|*) p='/proc/sys/net/ipv4/route/flush' ;;
+	esac
+	test -f $p
+}
+
 _iproute2_route_flush() {
-	_cmd ip $FAMILY route flush table cache dev "${IFACE}"
+	if _iproute2_route_flush_supported; then
+		_cmd ip $FAMILY route flush table cache dev "${IFACE}"
+	fi
 }
 
 _iproute2_ipv6_tentative_output() {
