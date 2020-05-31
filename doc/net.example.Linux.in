@@ -943,6 +943,7 @@
 # Bridging (802.1d)
 # Preferred: iproute2, emerge sys-apps/iproute2
 # Legacy: brctl, emerge net-misc/bridge-utils
+# # See https://wiki.gentoo.org/wiki/Network_bridge#OpenRC for further notes
 
 # To add ports to bridge br0
 #bridge_br0="eth0 eth1"
@@ -983,6 +984,15 @@
 #bridge_stp_state_br0="0"
 #bridge_forward_delay_br0="10"
 #brport_hairpin_mode_eth0="1"
+
+# It is important to include bridge_forward_delay_br0=0 and
+# bridge_hello_time_br0=1000 in the /etc/conf.d/net file in order to bring the
+# bridge interface up quickly. Other values will cause network packets to be
+# dropped for the first 30 seconds after the bridge has become active. This, in
+# turn, could prevent DHCP from working as intended.
+#bridge_forward_delay_br0=0
+#bridge_hello_time_br0=1000
+
 
 #-----------------------------------------------------------------------------
 # RFC 2684 Bridge Support
