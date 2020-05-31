@@ -103,8 +103,8 @@ ip6to4_pre_start()
 
 ip6to4_start()
 {
-	local config_ip6to4=$(service_get_value "config_ip6to4_$IFVAR")
-	local routes_ip6to4=$(service_get_value "routes_ip6to4_$IFVAR")
+	local config_ip6to4="$(service_get_value "config_ip6to4_$IFVAR")"
+	local routes_ip6to4="$(service_get_value "routes_ip6to4_$IFVAR")"
 
 	# Now apply our config
 	eval config_${config_index}=\'"${config_ip6to4}"\'
