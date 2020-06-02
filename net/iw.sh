@@ -585,27 +585,30 @@ iw_configure()
 	[ -z "${SSID}" ] && eval SSID=\$essid_${IFVAR}
 
 	# Setup ad-hoc mode?
-	eval x=\$mode_${IFVAR}
-	x=${x:-managed}
+	eval _mode=\$mode_${IFVAR}
+	_mode=${_mode:-managed}
 
-	if [ "${x}" = "master" ]; then
-		eerror "Please use hostapd to make this interface an access point"
-		return 1
-	fi
-
-	if [ "${x}" = "ad-hoc" ]; then
-		iw_setup_adhoc
-		return $?
-	fi
-
-	if [ "${x}" != "managed" ]; then
-		eerror "Only managed and ad-hoc are supported"
-		return 1
-	fi
+	case "${_mode}" in
+		master)
+			eerror "Please use hostapd to make this interface an access point"
+			return 1
+			;;
+		ad-hoc|adhoc)
+			iw_setup_adhoc
+			return $?
+			;;
+		managed)
+			# Fall through
+			;;
+		*)
+			eerror "Only managed and ad-hoc are supported"
+			return 1
+			;;
+	esac
 
 	# Has an SSID been forced?
 	if [ -n "${SSID}" ]; then
-		iw_set_mode "${x}"
+		iw_set_mode "${_mode}"
 		iw_associate && return 0
 		[ "${SSID}" = "any" ] && iw_force_preferred && return 0
 
