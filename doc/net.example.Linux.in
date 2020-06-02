@@ -231,7 +231,7 @@
 # do require the SSID to be set - do this here
 #essid_eth0="any"
 
-# Set the mode of the interface (managed, ad-hoc, master or auto)
+# Set the mode of the interface (managed, ad-hoc, master, mesh or auto)
 # The default is auto
 # If it's ad-hoc or master you also may need to specify the channel below
 #mode_eth0="auto"
@@ -408,6 +408,11 @@
 
 # NOTE: preferred_aps  list ignores blacklisted_aps - so if you have
 # the same SSID in both, well, you're a bit silly :p
+
+# 802.11s mesh support
+# Requires CONFIG_MAC80211_MESH in kernel and hardware support
+#mode_wlan0="mesh"
+#mesh_wlan0="MyMeshNetworkID"
 
 
 ############################################################

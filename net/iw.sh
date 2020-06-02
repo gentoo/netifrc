@@ -5,6 +5,7 @@
 
 _config_vars="$_config_vars ssid mode associate_timeout sleep_scan"
 _config_vars="$_config_vars preferred_aps blacklist_aps"
+_config_vars="$_config_vars mesh"
 
 iw_depend()
 {
@@ -162,6 +163,26 @@ iw_setup_adhoc()
 		iw dev "${IFACE}" ibss join "${SSID}" "${channel}" \
 			key "${key}"|| return 1
 	fi
+
+	# Finally apply the user Config
+	iw_user_config
+
+	iw_report
+	return 0
+}
+
+iw_setup_mesh()
+{
+	if [ -z "${MESH}" ]; then
+		eerror "${IFACE} requires a MESH to be set to operate in mesh mode"
+		eerror "adjust the mesh_${IFVAR} setting in /etc/conf.d/net"
+		return 1
+	fi
+
+	iw_set_mode 'mesh'
+
+	veinfo "Joining mesh '$MESH' with $IFACE"
+	iw ${IFACE} mesh join "${MESH}" || return 1
 
 	# Finally apply the user Config
 	iw_user_config
@@ -599,6 +620,10 @@ iw_configure()
 			;;
 		managed)
 			# Fall through
+			;;
+		mesh)
+			iw_setup_mesh
+			return $?
 			;;
 		*)
 			eerror "Only managed and ad-hoc are supported"
