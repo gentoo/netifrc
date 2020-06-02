@@ -43,8 +43,20 @@
 # You can also specify which modules not to use - for example you may be
 # using a supplicant or linux-wlan-ng to control wireless configuration but
 # you still want to configure network settings per SSID associated with.
-#modules="!iwconfig !wpa_supplicant"
-# IMPORTANT: If you need the above, please disable modules in that order
+#
+# A common case here may be using hostapd or other external configuration of
+# the wireless hardware at layer 2, but leaving netifrc to configure the layer
+# 3 networking
+#
+# Best practice for this situation is to disable ALL netifrc wireless modules:
+#modules="!wireless"
+#
+# This supersedes older cases where each module was disabled seperately:
+# If new modules are introduced that provide wireless support, they may be used
+# automatically otherwise, causing situations like
+# https://bugs.gentoo.org/717226
+# Do not use a line like this anymore:
+#modules="!iwconfig !wpa_supplicant !iw !iwd"
 
 
 ##############################################################################
@@ -435,9 +447,8 @@
 # won't have associated then)
 
 # If you're using anything else to configure wireless on your interface AND
-# you have installed wpa_supplicant, you need to disable wpa_supplicant
-#modules="!iwconfig !wpa_supplicant"
-#or
+# you have installed wpa_supplicant, you need to disable wpa_supplicant.
+# Please see the note about hostapd in the MODULES section.
 #modules="!wireless"
 
 ##############################################################################
