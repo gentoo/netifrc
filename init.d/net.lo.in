@@ -295,6 +295,7 @@ _get_errorhandler_behavior() {
 			echo "$value" && break
 		fi
 	done
+}
 
 _show_address6()
 {
