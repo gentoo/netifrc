@@ -9,36 +9,56 @@ iproute2_depend()
 	after ifconfig
 }
 
-# This helper exists for the common pattern of 'veinfo $CMD ; $CMD'
-_cmd()
-{
-	veinfo "${@}"
-	"${@}"
-}
-
 _up()
 {
-	_cmd ip link set dev "${IFACE}" up
+	_ip -v link set dev "${IFACE}" up
 }
 
 _down()
 {
-	_cmd ip link set dev "${IFACE}" down
+	_ip -v link set dev "${IFACE}" down
 }
 
 _exists()
 {
-	[ -e /sys/class/net/"$IFACE" ]
+	_netns [ -e /sys/class/net/"$IFACE" ]
+}
+
+_set_netns()
+{
+	eval netns="\$netns_${IFVAR}"
+}
+
+_ip()
+{
+	local v
+	if [ "${1}" = -v ]; then
+		v=1
+		shift
+	fi
+
+	local ip
+	if ! ip=$(command -v ip 2>/dev/null) || [ ! -x "${ip}" ]; then
+		eerror "Please make sure that iproute2 is installed"
+		exit 1
+	fi
+
+	local netns
+	_set_netns
+	# make sure the netns exists
+	[ -n "${netns}" ] && [ -e /run/netns/"${netns}" ] && set -- -n "${netns}" "${@}"
+	[ -n "${v}" ] && veinfo ip "${@}"
+	"${ip}" "${@}"
 }
 
 _ifindex()
 {
 	local index=-1
 	local f v
-	if [ -e /sys/class/net/"${IFACE}"/ifindex ]; then
-		index=$(cat /sys/class/net/"${IFACE}"/ifindex)
+	if _netns [ -e /sys/class/net/"${IFACE}"/ifindex ]; then
+		index=$(_netns cat /sys/class/net/"${IFACE}"/ifindex)
 	else
-		for f in /sys/class/net/*/ifindex ; do
+		for f in $(_netns glob /sys/class/net/\*/ifindex); do
 			v=$(cat $f)
 			[ $v -gt $index ] && index=$v
 		done
@@ -51,11 +71,11 @@ _ifindex()
 _is_wireless()
 {
 	# Support new sysfs layout
-	[ -d /sys/class/net/"${IFACE}"/wireless -o \
+	_netns [ -d /sys/class/net/"${IFACE}"/wireless -o \
 		-d /sys/class/net/"${IFACE}"/phy80211 ] && return 0
 
-	[ ! -e /proc/net/wireless ] && return 1
-	grep -Eq "^[[:space:]]*${IFACE}:" /proc/net/wireless
+	_netns [ ! -e /proc/net/wireless ] && return 1
+	_netns grep -Eq "^[[:space:]]*${IFACE}:" /proc/net/wireless
 }
 
 _set_flag()
@@ -65,13 +85,16 @@ _set_flag()
 		flag=${flag#-}
 		opt="off"
 	fi
-	_cmd ip link set dev "${IFACE}" "${flag}" "${opt}"
+	_ip -v link set dev "${IFACE}" "${flag}" "${opt}"
 }
 
 _get_mac_address()
 {
 	local mac=
 	read -r mac < /sys/class/net/"${IFACE}"/address || return 1
+	local mac=$(LC_ALL=C _ip link show "${IFACE}" | sed -n \
+		-e 'y/abcdef/ABCDEF/' \
+		-e '/link\// s/^.*\<\(..:..:..:..:..:..\)\>.*/\1/p')
 
 	case "${mac}" in
 		00:00:00:00:00:00) return 1 ;;
@@ -84,7 +107,7 @@ _get_mac_address()
 
 _set_mac_address()
 {
-	_cmd ip link set dev "${IFACE}" address "$1"
+	_ip -v link set dev "${IFACE}" address "$1"
 }
 
 _get_inet_addresses()
@@ -93,7 +116,7 @@ _get_inet_addresses()
 	if [ -z "$family" ]; then
 		family="inet"
 	fi
-	LC_ALL=C ip -family $family addr show "${IFACE}" | \
+	LC_ALL=C _ip -family $family addr show "${IFACE}" | \
 	sed -n -e 's/.*inet6\? \([^ ]*\).*/\1/p'
 }
 
@@ -118,7 +141,7 @@ _get_inet6_address()
 _add_address()
 {
 	if [ "$1" = "127.0.0.1/8" -a "${IFACE}" = "lo" ]; then
-		_cmd ip addr add "$@" dev "${IFACE}" 2>/dev/null
+		_ip -v addr add "$@" dev "${IFACE}" 2>/dev/null
 		return 0
 	fi
 	local x
@@ -188,13 +211,13 @@ _add_address()
 	[ -z "$netmask" ] && netmask=$family_maxnetmask
 
 	# Check for address already existing:
-	ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>/dev/null | \
+	_ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>/dev/null | \
 		grep -Fsq "${address}"
 	address_already_exists=$?
 
 	# This must appear on a single line, continuations cannot be used
 	set -- "${address}${netmask:+/}${netmask}" ${peer:+peer} ${peer} ${broadcast:+broadcast} ${broadcast} ${anycast:+anycast} ${anycast} ${label:+label} ${label} ${scope:+scope} ${scope} dev "${IFACE}" ${valid_lft:+valid_lft} $valid_lft ${preferred_lft:+preferred_lft} $preferred_lft $confflaglist
-	_cmd ip addr add "$@"
+	_ip -v addr add "$@"
 	rc=$?
 	# Check return code in some cases
 	if [ $rc -ne 0 ]; then
@@ -210,7 +233,7 @@ _add_address()
 				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
 			eval $msgfunc "Address ${address}${netmask:+/}${netmask} already existed!"
-			eval $msgfunc \"$(ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)\"
+			eval $msgfunc \"$(_ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)\"
 		else
 			: # TODO: Handle other errors
 		fi
@@ -261,11 +284,11 @@ _add_route()
 	fi
 
 	# Check for route already existing:
-	ip ${family} route show ${cmd_nometric} dev "${IFACE}" 2>/dev/null | \
+	_ip ${family} route show ${cmd_nometric} dev "${IFACE}" 2>/dev/null | \
 		grep -Fsq "${cmd%% *}"
 	route_already_exists=$?
 
-	_cmd ip ${family} route append ${cmd} dev "${IFACE}"
+	_ip -v ${family} route append ${cmd} dev "${IFACE}"
 	rc=$?
 	# Check return code in some cases
 	if [ $rc -ne 0 ]; then
@@ -281,7 +304,7 @@ _add_route()
 				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
 			eval $msgfunc "Route '$cmd_nometric' already existed:"
-			eval $msgfunc \"$(ip $family route show ${cmd_nometric} dev "${IFACE}" 2>&1)\"
+			eval $msgfunc \"$(_ip $family route show ${cmd_nometric} dev "${IFACE}" 2>&1)\"
 		else
 			: # TODO: Handle other errors
 		fi
@@ -291,23 +314,23 @@ _add_route()
 
 _delete_addresses()
 {
-	_cmd ip addr flush dev "${IFACE}" scope global 2>/dev/null
-	_cmd ip addr flush dev "${IFACE}" scope site 2>/dev/null
+	_ip -v addr flush dev "${IFACE}" scope global 2>/dev/null
+	_ip -v addr flush dev "${IFACE}" scope site 2>/dev/null
 	if [ "${IFACE}" != "lo" ]; then
-		_cmd ip addr flush dev "${IFACE}" scope host 2>/dev/null
+		_ip -v addr flush dev "${IFACE}" scope host 2>/dev/null
 	fi
 	return 0
 }
 
 _has_carrier()
 {
-	LC_ALL=C ip link show dev "${IFACE}" | grep -Fq "LOWER_UP"
+	LC_ALL=C _ip link show dev "${IFACE}" | grep -Fq "LOWER_UP"
 }
 
 # Used by iproute2, ip6rd & ip6to4
 _tunnel()
 {
-	_cmd ip $FAMILY tunnel "$@"
+	_ip $FAMILY tunnel "$@"
 	rc=$?
 	# TODO: check return code in some cases
 	return $rc
@@ -337,7 +360,7 @@ _ip_rule_runner() {
 		ruN="$(_trim "${ru}")"
 		[ -z "${ruN}" ] && continue
 		vebegin "${cmd} ${ruN}"
-		ip $family rule ${cmd} ${ru}
+		_ip $family rule ${cmd} ${ru}
 		veend $?
 		local IFS="$__IFS"
 	done
@@ -348,10 +371,10 @@ _ip_rule_runner() {
 _iproute2_policy_routing()
 {
 	# Kernel may not have IP built in
-	if [ -e /proc/net/route ]; then
+	if _netns [ -e /proc/net/route ]; then
 		local rules="$(_get_array "rules_${IFVAR}")"
 		if [ -n "${rules}" ]; then
-			if ! ip -4 rule list | grep -q "^"; then
+			if ! _ip -4 rule list | grep -q "^"; then
 				eerror "IP Policy Routing (CONFIG_IP_MULTIPLE_TABLES) needed for ip rule"
 			else
 				service_set_value "ip_rule" "${rules}"
@@ -366,7 +389,7 @@ _iproute2_policy_routing()
 	if [ -e /proc/net/ipv6_route ]; then
 		local rules="$(_get_array "rules6_${IFVAR}")"
 		if [ -n "${rules}" ]; then
-			if ! ip -6 rule list | grep -q "^"; then
+			if ! _ip -6 rule list | grep -q "^"; then
 				eerror "IPv6 Policy Routing (CONFIG_IPV6_MULTIPLE_TABLES) needed for ip rule"
 			else
 				service_set_value "ip6_rule" "${rules}"
@@ -375,6 +398,37 @@ _iproute2_policy_routing()
 			fi
 		fi
 		FAMILY="-6" IFACE="${IFACE}" _iproute2_route_flush
+	fi
+}
+
+iproute2_pre_up()
+{
+	local netns
+	_set_netns
+	if [ -n "${netns}" ] && [ -e /sys/class/net/"${IFACE}" ] ; then
+		local ip
+		ip=$(command -v ip 2>/dev/null)
+
+		if [ ! -e /run/netns/"${netns}" ]; then
+			if ! "${ip}" netns add "${netns}"; then
+				eerror "Could not create netns ${netns} for ${iface}"
+				return 1
+			fi
+
+			if ! _ip link set up lo; then
+				eerror "Could not enable lo interface in netns ${netns} for ${iface}"
+				return 1
+			fi
+			if ! _ip route add 127.0.0.0/8 via 127.0.0.1 dev lo; then
+				eerror "Could not enable lo interface in netns ${netns} for ${iface}"
+				return 1
+			fi
+		fi
+
+		if ! "${ip}" link set netns "${netns}" dev "${IFACE}"; then
+			eerror "Could not move ${IFACE} to netns ${netns}"
+			return 1
+		fi
 	fi
 }
 
@@ -396,7 +450,7 @@ iproute2_pre_start()
 		esac
 
 		ebegin "Creating tunnel ${IFVAR}"
-		_cmd ip ${ipproto} tunnel add ${tunnel} name "${IFACE}"
+		_ip -v ${ipproto} tunnel add ${tunnel} name "${IFACE}"
 		eend $? || return 1
 		_up
 	fi
@@ -411,7 +465,7 @@ iproute2_pre_start()
 		esac
 
 		ebegin "Creating interface ${IFVAR}"
-		_cmd ip ${ipproto} link add "${IFACE}" ${link}
+		_ip -v ${ipproto} link add "${IFACE}" ${link}
 		eend $? || return 1
 		_up
 	fi
@@ -420,14 +474,14 @@ iproute2_pre_start()
 	local mtu=
 	eval mtu=\$mtu_${IFVAR}
 	if [ -n "${mtu}" ]; then
-		_cmd ip link set dev "${IFACE}" mtu "${mtu}"
+		_ip -v link set dev "${IFACE}" mtu "${mtu}"
 	fi
 
 	# TX Queue Length support
 	local len=
 	eval len=\$txqueuelen_${IFVAR}
 	if [ -n "${len}" ]; then
-		_cmd ip link set dev "${IFACE}" txqueuelen "${len}"
+		_ip -v link set dev "${IFACE}" txqueuelen "${len}"
 	fi
 
 	local policyroute_order=
@@ -446,7 +500,7 @@ _iproute2_tunnel_delete() {
 
 _iproute2_link_delete() {
 	ebegin "Destroying interface $1"
-	_cmd ip $FAMILY link del dev "$1"
+	_ip -v $FAMILY link del dev "$1"
 	eend $?
 }
 
@@ -460,12 +514,12 @@ _iproute2_route_flush_supported() {
 
 _iproute2_route_flush() {
 	if _iproute2_route_flush_supported; then
-		_cmd ip $FAMILY route flush table cache dev "${IFACE}"
+		_ip -v $FAMILY route flush table cache dev "${IFACE}"
 	fi
 }
 
 _iproute2_ipv6_tentative_output() {
-	LC_ALL=C ip -family inet6 addr show dev ${IFACE} tentative
+	LC_ALL=C _ip -family inet6 addr show dev ${IFACE} tentative
 }
 
 _iproute2_ipv6_tentative()
@@ -550,14 +604,14 @@ iproute2_post_stop()
 
 	# Don't delete sit0 as it's a special tunnel
 	if [ "${IFACE}" != "sit0" ]; then
-		if [ -n "$(ip tunnel show "${IFACE}" 2>/dev/null)" ]; then
+		if [ -n "$(_ip tunnel show "${IFACE}" 2>/dev/null)" ]; then
 			_iproute2_tunnel_delete "${IFACE}"
-		elif  [ -n "$(ip -6 tunnel show "${IFACE}" 2>/dev/null)" ]; then
+		elif  [ -n "$(_ip -6 tunnel show "${IFACE}" 2>/dev/null)" ]; then
 			FAMILY=-6 _iproute2_tunnel_delete "${IFACE}"
 		fi
 
-		[ -n "$(ip link show "${IFACE}" type gretap 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
-		[ -n "$(ip link show "${IFACE}" type vxlan 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
+		[ -n "$(_ip link show "${IFACE}" type gretap 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
+		[ -n "$(_ip link show "${IFACE}" type vxlan 2>/dev/null)" ] && _iproute2_link_delete "${IFACE}"
 	fi
 }
 
@@ -572,7 +626,7 @@ is_admin_up()
 {
 	local iface="$1"
 	[ -z "$iface" ] && iface="$IFACE"
-	ip link show dev $iface | \
+	_ip link show dev $iface | \
 	sed -n '1,1{ /[<,]UP[,>]/{ q 0 }}; q 1; '
 }
 

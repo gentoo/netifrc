@@ -660,6 +660,12 @@ start()
 		_load_modules true
 	fi
 
+	for module in ${MODULES}; do
+		if [ "$(command -v "${module}_pre_up")" = "${module}_pre_up" ]; then
+			${module}_pre_up || exit $?
+		fi
+	done
+
 	# We up the iface twice if we have a preup to ensure it's up if
 	# available in preup and afterwards incase the user inadvertently
 	# brings it down

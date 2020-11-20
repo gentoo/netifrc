@@ -136,4 +136,45 @@ get_interface() {
 	esac
 }
 
+# runs a command in a network namespace
+_netns()
+{
+	local netns
+	eval netns="\$netns_${IFVAR}"
+
+	if [ -n "${netns}" ] && [ -e /run/netns/"${netns}" ]; then
+		# we always want to use the system "ip" command, not the busybox internal
+		local ip
+		if ! ip=$(command -v ip 2>/dev/null) || [ ! -x "${ip}" ]; then
+			eerror "Cannot use network namespaces without iproute2"
+			exit 1
+		fi
+		# shellcheck disable=SC2016
+		case "${1}" in
+			ip)
+				shift
+				"${ip}" -n "${netns}" "${@}"
+			;;
+			glob) "${ip}" netns exec "${netns}" /bin/sh -c 'printf "%s\\n" ${@}' "${@}";;
+			echo|printf) "${ip}" netns exec "${netns}" /bin/sh -c "${*}";;
+			*) "${ip}" netns exec "${netns}" "${@}";;
+		esac
+	else
+		# shellcheck disable=SC2048
+		case "${1}" in
+			ip)
+				shift
+				"${ip}" "${@}"
+			;;
+			glob)
+				shift
+				eval printf '%s\\n' "${@}"
+			;;
+			echo|printf) eval "${@}";;
+			*) "${@}";;
+		esac
+	fi
+}
+
+
 # vim: ts=4 sw=4 noexpandtab
