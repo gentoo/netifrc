@@ -13,16 +13,20 @@ _is_dummy() {
 	is_interface_type dummy
 }
 
+_ip()
+{
+	veinfo ip "${@}"
+	_netns ip "${@}"
+}
+
 dummy_pre_start()
 {
 	local dummy=
-	eval dummy=\$type_${IFVAR}
+	eval dummy="\$type_${IFVAR}"
 	[ "${dummy}" = "dummy" ] || return 0
 
 	ebegin "Creating dummy interface ${IFACE}"
-	cmd="ip link add name "${IFACE}" type dummy"
-	veinfo $cmd
-	if $cmd ; then
+	if _ip link add name "${IFACE}" type dummy ; then
 		eend 0 && _up && set_interface_type dummy
 	else
 		eend 1
@@ -35,8 +39,6 @@ dummy_post_stop()
 	_is_dummy || return 0
 
 	ebegin "Removing dummy ${IFACE}"
-	cmd="ip link delete "${IFACE}" type dummy"
-	veinfo "$cmd"
-	$cmd
+	_ip link delete "${IFACE}" type dummy
 	eend $?
 }
