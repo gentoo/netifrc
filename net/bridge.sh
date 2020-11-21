@@ -12,19 +12,19 @@ _config_vars="$_config_vars bridge bridge_add brctl"
 
 _is_bridge()
 {
-	[ -d /sys/class/net/"${1:-${IFACE}}"/bridge ]
+	_netns [ -d /sys/class/net/"${1:-${IFACE}}"/bridge ]
 	return $?
 }
 
 _is_bridge_port()
 {
-	[ -d /sys/class/net/"${1:-${IFACE}}"/brport ]
+	_netns [ -d /sys/class/net/"${1:-${IFACE}}"/brport ]
 	return $?
 }
 
 _bridge_ports()
 {
-	for x in /sys/class/net/"${1:-${IFACE}}"/brif/*; do
+	for x in $(_netns glob /sys/class/net/"${1:-${IFACE}}"/brif/\*); do
 		n=${x##*/}
 		echo $n
 	done
@@ -82,7 +82,7 @@ bridge_pre_start()
 	if ! _is_bridge ; then
 		ebegin "Creating bridge ${IFACE}"
 		if ${do_iproute2}; then
-			ip link add "${IFACE}" type bridge
+			_netns ip link add "${IFACE}" type bridge
 			rc=$?
 		elif ${do_brctl}; then
 			brctl addbr "${IFACE}"
@@ -123,7 +123,7 @@ bridge_pre_start()
 	fi
 
 	# New configuration set mechanism, matches bonding
-	for x in /sys/class/net/"${IFACE}"/bridge/*; do
+	for x in $(_netns glob /sys/class/net/"${IFACE}"/bridge/\*); do
 		[ -f "${x}" ] || continue
 		n=${x##*/}
 		# keep no prefix for backward compatibility
@@ -132,7 +132,7 @@ bridge_pre_start()
 			if [ -n "${s}" ]; then
 				[ -z "${prefix}" ] && ewarn "sysfs key '${n}_${IFVAR}' should be prefixed, please add bridge_ prefix."
 				einfo "Setting ${n}: ${s}"
-				echo "${s}" >"${x}" || \
+				_netns echo "${s}" \>"${x}" || \
 				eerror "Failed to configure $n (${n}_${IFVAR})"
 			fi
 		done
@@ -154,7 +154,7 @@ bridge_pre_start()
 			# The interface is known to exist now
 			_up
 			if ${do_iproute2}; then
-				ip link set "${x}" master "${BR_IFACE}"
+				_netns ip link set "${x}" master "${BR_IFACE}"
 			elif ${do_brctl}; then
 				brctl addif "${BR_IFACE}" "${x}"
 			fi
@@ -163,7 +163,7 @@ bridge_pre_start()
 				return 1
 			fi
 			# Per-interface bridge settings
-			for x in /sys/class/net/"${IFACE}"/brport/*; do
+			for x in $(_netns glob /sys/class/net/"${IFACE}"/brport/\*); do
 				[ -f "${x}" ] || continue
 				n=${x##*/}
 				for prefix in "" brport_; do
@@ -171,7 +171,7 @@ bridge_pre_start()
 					if [ -n "${s}" ]; then
 						[ -z "${prefix}" ] && ewarn "sysfs key '${n}_${IFVAR}' should be prefixed, please add brport_ prefix."
 						einfo "Setting ${n}@${IFACE}: ${s}"
-						echo "${s}" >"${x}" || \
+						_netns echo "${s}" \>"${x}" || \
 						eerror "Failed to configure $n (${n}_${IFVAR})"
 					fi
 				done
@@ -194,7 +194,7 @@ bridge_post_stop()
 	if _is_bridge "${IFACE}"; then
 		ebegin "Destroying bridge ${IFACE}"
 		_down
-		for x in /sys/class/net/"${IFACE}"/brif/*; do
+		for x in $(_netns glob /sys/class/net/"${IFACE}"/brif/\*); do
 			[ -s $x ] || continue
 			n=${x##*/}
 			ports="${ports} ${n}"
@@ -206,8 +206,8 @@ bridge_post_stop()
 		# We are taking down an interface that is part of a bridge maybe
 		ports="${IFACE}"
 		local brport_dir="/sys/class/net/${IFACE}/brport"
-		[ -d ${brport_dir} ] || return 0
-		iface=$(readlink ${brport_dir}/bridge)
+		_netns [ -d ${brport_dir} ] || return 0
+		iface=$(_netns readlink ${brport_dir}/bridge)
 		iface=${iface##*/}
 		[ -z "${iface}" ] && return 0
 		extra=" from ${iface}"
@@ -218,7 +218,7 @@ bridge_post_stop()
 		local IFACE="${port}"
 		_set_flag -promisc
 		if type ip > /dev/null 2>&1; then
-			ip link set "${port}" nomaster
+			_netns ip link set "${port}" nomaster
 		else
 			brctl delif "${iface}" "${port}"
 		fi
@@ -228,7 +228,7 @@ bridge_post_stop()
 	if ${delete}; then
 		eoutdent
 		if type ip > /dev/null 2>&1; then
-			ip link del "${iface}"
+			_netns ip link del "${iface}"
 		else
 			brctl delbr "${iface}"
 		fi
