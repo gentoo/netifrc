@@ -12,13 +12,18 @@ bonding_depend()
 	if [ ! -d /sys/class/net ]; then
 		program /sbin/ifenslave
 	fi
+
+	local netns
+	eval netns="\$netns_${IFVAR}"
+	[ -n "${netns}" ] && program ip
+	return 0
 }
 
 _config_vars="$_config_vars slaves"
 
 _is_bond()
 {
-	[ -f "/proc/net/bonding/${IFACE}" ]
+	_netns [ -f "/proc/net/bonding/${IFACE}" ]
 }
 
 bonding_pre_start()
@@ -52,7 +57,7 @@ bonding_pre_start()
 	# We can create the interface name we like now, but this
 	# requires sysfs
 	if ! _exists && [ -d /sys/class/net ]; then
-		echo "+${IFACE}" > /sys/class/net/bonding_masters
+		_netns echo "+${IFACE}" \> /sys/class/net/bonding_masters
 	fi
 	_exists true || return 1
 
@@ -68,13 +73,13 @@ bonding_pre_start()
 	# we configure all other options
 	# mode needs to be done before all other options.
 	# miimon needs to be done BEFORE downdelay
-	[ -d /sys/class/net ] && for n in mode miimon; do
+	_netns [ -d /sys/class/net ] && for n in mode miimon; do
 		x=/sys/class/net/"${IFACE}"/bonding/$n
-		[ -f "${x}" ] || continue
+		_netns [ -f "${x}" ] || continue
 		eval s=\$${n}_${IFVAR}
 		if [ -n "${s}" ]; then
 			einfo "Setting ${n}: ${s}"
-			echo "${s}" >"${x}" || \
+			_netns echo "${s}" \>"${x}" || \
 			eerror "Failed to configure $n (${n}_${IFVAR})"
 		fi
 	done
@@ -82,19 +87,19 @@ bonding_pre_start()
 	# With a leading '+' as a prefix.
 	n=arp_ip_target
 	x=/sys/class/net/"${IFACE}"/bonding/$n
-	[ -d /sys/class/net ] && if [ -f "$x" ]; then
+	_netns [ -d /sys/class/net ] && if _netns [ -f "$x" ]; then
 		eval s=\$${n}_${IFVAR}
 		if [ -n "${s}" ]; then
 			for i in $s; do
 				einfo "Adding ${n}: ${i}"
-				echo "+${i/+/}" >"${x}" || \
+				_netns echo "+${i/+/}" \>"${x}" || \
 				eerror "Failed to add $i (${n}_${IFVAR})"
 			done
 		fi
 	fi
 	# Nice and dynamic for remaining options:)
-	[ -d /sys/class/net ] && for x in /sys/class/net/"${IFACE}"/bonding/*; do
-		[ -f "${x}" ] || continue
+	_netns [ -d /sys/class/net ] && for x in $(_netns glob /sys/class/net/"${IFACE}"/bonding/\*); do
+		_netns [ -f "${x}" ] || continue
 		n=${x##*/}
 		# These entries are already handled above.
 		case "$n" in
@@ -106,7 +111,7 @@ bonding_pre_start()
 		eval s=\$${n}_${IFVAR}
 		if [ -n "${s}" ]; then
 			einfo "Setting ${n}: ${s}"
-			echo "${s}" >"${x}" || \
+			_netns echo "${s}" \>"${x}" || \
 			eerror "Failed to configure $n (${n}_${IFVAR})"
 		fi
 	done
@@ -145,9 +150,9 @@ bonding_pre_start()
 		unset oiface
 		eoutdent
 		# subsume (presumably kernel auto-)configured IP
-		if [ -x "$(command -v ip)" ]; then
-			ip link set ${IFACE} up
-			ip address add ${addr} dev ${IFACE}
+		if [ -x "$(command -v ip 2>/dev/null)" ]; then
+			_netns ip link set ${IFACE} up
+			_netns ip address add ${addr} dev ${IFACE}
 		else
 			ifconfig ${IFACE} ${addr} up
 		fi
@@ -171,7 +176,7 @@ bonding_pre_start()
 	# set mtu: ifenslave, kernel
 	# set slave MAC: ifenslave, kernel
 	eoutdent
-	if [ -d /sys/class/net ]; then
+	if _netns [ -d /sys/class/net ]; then
 		sys_bonding_path=/sys/class/net/"${IFACE}"/bonding
 		local oiface
 		oiface=$IFACE
@@ -179,20 +184,20 @@ bonding_pre_start()
 			IFACE=$primary
 			_down
 			IFACE=$oiface
-			echo "+${primary}" >$sys_bonding_path/slaves
-			echo "${primary}" >$sys_bonding_path/primary
+			_netns echo "+${primary}" \> $sys_bonding_path/slaves
+			_netns echo "${primary}" \> $sys_bonding_path/primary
 		fi
 		for s in ${slaves}; do
 			[ "${s}" = "${primary}" ] && continue
-			if ! grep -q ${s} $sys_bonding_path/slaves; then
+			if ! _netns grep -q ${s} $sys_bonding_path/slaves; then
 				IFACE=$s
 				_down
 				IFACE=$oiface
-				echo "+${s}" >$sys_bonding_path/slaves
+				_netns echo "+${s}" \> $sys_bonding_path/slaves
 			fi
 		done
 	else
-		ifenslave "${IFACE}" ${slaves} >/dev/null
+		_netns ifenslave "${IFACE}" ${slaves} >/dev/null
 	fi
 	eend $?
 
@@ -206,7 +211,7 @@ bonding_stop()
 	# Wipe subsumed interface
 	if [ -n "${subsume}" ]; then
 		if [ -x "$(command -v ip)" ]; then
-			ip address flush dev ${subsume}
+			_netns ip address flush dev ${subsume}
 		else
 			ifconfig ${subsume} 0.0.0.0
 		fi
@@ -214,7 +219,7 @@ bonding_stop()
 
 	local slaves= s=
 	slaves=$( \
-		sed -n -e 's/^Slave Interface: //p' "/proc/net/bonding/${IFACE}" \
+		_netns sed -n -e 's/^Slave Interface: //p' "/proc/net/bonding/${IFACE}" \
 		| tr '\n' ' ' \
 	)
 	[ -z "${slaves}" ] && return 0
@@ -224,12 +229,12 @@ bonding_stop()
 	eindent
 	einfo "${slaves}"
 	eoutdent
-	if [ -d /sys/class/net ]; then
+	if _netns [ -d /sys/class/net ]; then
 		for s in ${slaves}; do
-			echo -"${s}" > /sys/class/net/"${IFACE}"/bonding/slaves
+			_netns echo -"${s}" \> /sys/class/net/"${IFACE}"/bonding/slaves
 		done
 	else
-		ifenslave -d "${IFACE}" ${slaves}
+		_netns ifenslave -d "${IFACE}" ${slaves}
 	fi
 
 	# reset all slaves
@@ -244,8 +249,8 @@ bonding_stop()
 
 	_down
 
-	if [ -d /sys/class/net ]; then
-		echo "-${IFACE}" > /sys/class/net/bonding_masters
+	if _netns [ -d /sys/class/net ]; then
+		_netns echo "-${IFACE}" \> /sys/class/net/bonding_masters
 	fi
 
 	eend 0
