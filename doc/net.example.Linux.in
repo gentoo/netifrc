@@ -1333,6 +1333,15 @@
 # Wireguard can also be configured by passing explicit settings
 #wireguard_wg0="private-key /path/to/whatever listen-port 1234 peer ABCDEF= endpoint 1.2.3.4:2468"
 
+# Network namespace support 
+# If an interface is configured with a network namespace, it will be moved
+# in to that namespace before being started. This does not have any functionality
+# to move interfaces out of network namespaces. The next time the interfaces is
+# started, it will simply start the interface inside the namespace.
+#
+# Note that not all functionality has been updated to work with network namespace
+#netns_eth0="mynetns"
+
 ##############################################################################
 # ADVANCED CONFIGURATION
 #
