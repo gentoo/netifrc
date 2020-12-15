@@ -20,7 +20,7 @@ dhcpcd_start()
 	# alter the pidfile's name (#718114)
 	# Save the args into a file so dhcpcd_stop can later re-use the very
 	# same args later.
-	local args= opt= pidfile= opts= new=true argsfile=/run/netifrc_dhcpcd_${IFACE}_args
+	local args= opt= pidfile= opts= argsfile=/run/netifrc_dhcpcd_${IFACE}_args
 	eval args=\$dhcpcd_${IFVAR}
 	[ -z "${args}" ] && args=${dhcpcd}
 	echo "${args}" > ${argsfile}
@@ -30,33 +30,24 @@ dhcpcd_start()
 	eval opts=\$dhcp_${IFVAR}
 	[ -z "${opts}" ] && opts=${dhcp}
 
-	case "$(dhcpcd --version)" in
-		"dhcpcd "[123]*) new=false;;
+	case "$(dhcpcd --version | head -n 1)" in
+		"dhcpcd "[123]*)
+			eerror 'The dhcpcd version is too old. Please upgrade.'
+			return 1
+			;;
 	esac
 
 	# Map some generic options to dhcpcd
 	for opt in ${opts}; do
 		case "${opt}" in
 			nodns)
-				if ${new}; then
-					args="${args} -C resolv.conf"
-				else
-					args="${args} -R"
-				fi
+				args="${args} -C resolv.conf"
 				;;
 			nontp)
-				if ${new}; then
-					args="${args} -C ntp.conf"
-				else
-					args="${args} -N"
-				fi
+				args="${args} -C ntp.conf"
 				;;
 			nonis)
-				if ${new}; then
-					args="${args} -C yp.conf"
-				else
-					args="${args} -Y"
-				fi
+				args="${args} -C yp.conf"
 				;;
 			nogateway) args="${args} -G";;
 			nosendhost) args="${args} -h ''";
