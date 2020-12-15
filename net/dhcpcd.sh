@@ -1,4 +1,5 @@
 # Copyright (c) 2007-2008 Roy Marples <roy@marples.name>
+# Copyright (c) 2020 Gentoo Authors
 # Released under the 2-clause BSD license.
 # shellcheck shell=sh disable=SC1008
 
@@ -55,9 +56,9 @@ dhcpcd_start()
 	done
 
 	# Add our route metric if not given
-	case " $args " in
+	case " ${args} " in
 	*" -m "*) ;;
-	*) [ "${metric:-0}" != 0 ] && args="$args -m $metric";;
+	*) [ "${metric:-0}" != 0 ] && args="${args} -m ${metric}";;
 	esac
 
 	# Bring up DHCP for this interface
