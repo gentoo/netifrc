@@ -5,7 +5,7 @@
 dhcpcd_depend()
 {
 	after interface
-	program start dhcpcd
+	program dhcpcd
 	provide dhcp
 
 	# We prefer dhcpcd over these
