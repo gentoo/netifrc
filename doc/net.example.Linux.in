@@ -805,9 +805,10 @@
 #link_ppp0="pty 'your_link_command'"	# PPP links over ssh, rsh, etc
 #
 # Here you should specify what pppd plugins you want to use
-# Available plugins are: pppoe, pppoa, capi, dhcpc, minconn, radius,
+# Available plugins are: pppoe, rp-pppoe, pppoa, capi, dhcpc, minconn, radius,
 #			 radattr, radrealms and winbind
-#plugins_ppp0="pppoe"			# Required plugin for PPPoE
+#plugins_ppp0="pppoe"			# Required plugin for PPPoE with >=ppp-2.4.9
+#plugins_ppp0="rp-pppoe"		# Required plugin for PPPoE with <ppp-2.4.9
 #plugins_ppp0="pppoa vc-encaps"		# Required plugin for PPPoA with an option
 #plugins_ppp0="capi"			# Required plugin for ISDN
 #

@@ -175,14 +175,13 @@ pppd_pre_start()
 		case "$1" in
 			passwordfd) continue;;
 			pppoa) shift; set -- "pppoatm" "$@";;
-			pppoe) shift; set -- "rp-pppoe" "$@";;
 			capi) shift; set -- "capiplugin" "$@";;
 		esac
 		case "$1" in
-			rp-pppoe) haspppoe=true;;
-			pppoatm)  haspppoa=true;;
+			pppoatm)        haspppoa=true;;
+			pppoe|rp-pppoe) haspppoe=true;;
 		esac
-		if [ "$1" = "rp-pppoe" ] || [ "$1" = "pppoatm" -a "${link}" != "/dev/null" ]; then
+		if [ "$1" = "pppoe" ] || [ "$1" = "rp-pppoe" ] || [ "$1" = "pppoatm" -a "${link}" != "/dev/null" ]; then
 			opts="${opts} connect true"
 			set -- "$@" "${link}"
 		fi
