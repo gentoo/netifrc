@@ -1,3 +1,3 @@
 NAME=		netifrc
-VERSION=	0.7.1
+VERSION=	0.7.2
 PKG=		${NAME}-${VERSION}
