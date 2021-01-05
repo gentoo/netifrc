@@ -65,10 +65,10 @@ pppd_pre_start()
 		return 0
 	fi
 
-	local link= i= unit="${IFACE#ppp}" opts= routemetric=defaultmetric
+	local link= i= unit="${IFACE#ppp}" opts= routemetric=defaultroute-metric
 
 	# https://github.com/paulusmack/ppp/commit/35e5a569c988b1ff865b02a24d9a727a00db4da9
-	pppd_is_ge_248 && routemetric=defaultroute-metric
+	pppd_is_ge_248 || routemetric=defaultmetric
 
 	# PPP requires a link to communicate over - normally a serial port
 	# PPPoE communicates over Ethernet
