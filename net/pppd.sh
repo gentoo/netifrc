@@ -23,7 +23,7 @@ requote()
 
 pppd_is_ge_248()
 {
-	local ver_str="$(/usr/sbin/pppd --version 2>&1 | grep -o '[[:digit:]\.]\+')"
+	local ver_str="$(/usr/sbin/pppd --version 2>&1 | awk '/pppd version/ {print $3}')"
 	local maj_ver="$(echo ${ver_str} | cut -d . -f 1)"
 	local min_ver="$(echo ${ver_str} | cut -d . -f 2)"
 	local patch_ver="$(echo ${ver_str} | cut -d . -f 3)"
