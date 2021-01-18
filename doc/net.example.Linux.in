@@ -451,6 +451,10 @@
 # pre/post user functions below (although it's not available in preup as you
 # won't have associated then)
 
+# If wpa_supplicant has been compiled with dbus support, it is necessary to
+# make the corresponding interface depend on the dbus daemon:
+#rc_net_wlan0_need="dbus"
+
 # If you're using anything else to configure wireless on your interface AND
 # you have installed wpa_supplicant, you need to disable wpa_supplicant.
 # Please see the note about hostapd in the MODULES section.
