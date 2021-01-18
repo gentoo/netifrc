@@ -23,28 +23,10 @@ requote()
 
 pppd_is_ge_248()
 {
-	local ver_str="$(/usr/sbin/pppd --version 2>&1 | awk '/pppd version/ {print $3}')"
-	local maj_ver="$(echo ${ver_str} | cut -d . -f 1)"
-	local min_ver="$(echo ${ver_str} | cut -d . -f 2)"
-	local patch_ver="$(echo ${ver_str} | cut -d . -f 3)"
+	local ver_str="$(/usr/sbin/pppd --version 2>&1 | awk '/pppd version/ {print $3}' | tr '.' ' ')"
 
-	if [ "${maj_ver}" -gt 2 ] ; then
-		return 0
-	elif [ "${maj_ver}" -eq 2 ] ; then
-		if [ "${min_ver}" -gt 4 ] ; then
-			return 0
-		elif [ "${min_ver}" -eq 4 ] ; then
-			if [ "${patch_ver}" -ge 8 ] ; then
-				return 0
-			else
-				return 1
-			fi
-		else
-			return 1
-		fi
-	else
-		return 1
-	fi
+	# 002004008 is v2.4.8
+	[ "$(printf '%03d' ${ver_str})" -ge 002004008 ]
 }
 
 pppd_pre_start()
