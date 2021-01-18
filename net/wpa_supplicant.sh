@@ -4,14 +4,6 @@
 
 wpa_supplicant_depend()
 {
-	wpas=/usr/sbin/wpa_supplicant
-	[ -x ${wpas} ] || wpas=/sbin/wpa_supplicant
-	if [ -x ${wpas} ]; then
-		program start ${wpas}
-		# bug 345281: if wpa_supplicant is built w/ USE=dbus, we need to start
-		# dbus before we can start wpa_supplicant.
-		${wpas} -h | grep -Fsq DBus && need dbus
-	fi
 	after macnet plug
 	before interface
 	provide wireless
