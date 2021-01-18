@@ -17,7 +17,7 @@ fi
 
 # ignore interfaces that are registered after being "up" (?)
 case ${IFACE} in
-	ppp*|ippp*|isdn*|plip*|lo*|irda*|dummy*|ipsec*|tun*|tap*|br*|macvtap*|ipvl*|vlan*|vxlan*|peth*|ifb*|veth*|gre*|vrf*)
+	ppp*|ippp*|isdn*|plip*|lo*|irda*|dummy*|ipsec*|tun*|tap*|br*|macvtap*|ipvl*|vlan*|vxlan*|peth*|ifb*|veth*|gre*|vrf*|wg*)
 		exit 0 ;;
 esac
 
