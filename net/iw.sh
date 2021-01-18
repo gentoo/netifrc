@@ -212,7 +212,7 @@ iw_wait_for_association()
 				# carrier on or buggy madwifi drivers that
 				# sometimes have carrier on and ssid set
 				# without being associated.  :/
-				[ -n "$(iw dev "${IFACE}" info |grep ssid)" ] && [ "${station_mac}" != "00:00:00:00:00:00" ] && return 0
+				[ -n "$(iw dev "${IFACE}" info | grep -F ssid)" ] && [ "${station_mac}" != "00:00:00:00:00:00" ] && return 0
 			fi
 		else
 			local atest=
@@ -704,7 +704,7 @@ iw_pre_start()
 
 	# Store the fact that tx-power was off so we default to a longer
 	# wait if our scan returns nothing
-	LC_ALL=C iw dev "${IFACE}" info | sed -e '1d' | grep -q "txpower 0.00"
+	LC_ALL=C iw dev "${IFACE}" info | sed -e '1d' | grep -Fq "txpower 0.00"
 	local txpowerwasoff=$?
 
 	iw_defaults

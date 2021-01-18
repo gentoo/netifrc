@@ -192,7 +192,7 @@ _add_address()
 
 	# Check for address already existing:
 	ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>/dev/null | \
-		fgrep -sq "${address}"
+		grep -Fsq "${address}"
 	address_already_exists=$?
 
 	# This must appear on a single line, continuations cannot be used
@@ -265,7 +265,7 @@ _add_route()
 
 	# Check for route already existing:
 	ip ${family} route show ${cmd_nometric} dev "${IFACE}" 2>/dev/null | \
-		fgrep -sq "${cmd%% *}"
+		grep -Fsq "${cmd%% *}"
 	route_already_exists=$?
 
 	_cmd ip ${family} route append ${cmd} dev "${IFACE}"
@@ -304,7 +304,7 @@ _delete_addresses()
 
 _has_carrier()
 {
-	LC_ALL=C ip link show dev "${IFACE}" | grep -q "LOWER_UP"
+	LC_ALL=C ip link show dev "${IFACE}" | grep -Fq "LOWER_UP"
 }
 
 # Used by iproute2, ip6rd & ip6to4

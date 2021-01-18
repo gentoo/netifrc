@@ -47,7 +47,7 @@ _is_wireless()
 		-d /sys/class/net/"${IFACE}"/phy80211 ] && return 0
 
 	[ ! -e /proc/net/wireless ] && return 1
-	grep -Eq "^[[:space:]]*${IFACE}:" /proc/net/wireless
+	grep -q "^[[:space:]]*${IFACE}:" /proc/net/wireless
 }
 
 _set_flag()

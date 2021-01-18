@@ -10,8 +10,7 @@ wpa_supplicant_depend()
 		program start ${wpas}
 		# bug 345281: if wpa_supplicant is built w/ USE=dbus, we need to start
 		# dbus before we can start wpa_supplicant.
-		${wpas} -h |grep DBus -sq
-		[ $? -eq 0 ] && need dbus
+		${wpas} -h | grep -Fsq DBus && need dbus
 	fi
 	after macnet plug
 	before interface

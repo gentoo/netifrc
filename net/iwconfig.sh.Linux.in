@@ -17,9 +17,8 @@ iwconfig_get_wep_status()
 {
 	local mode= status="disabled"
 
-	# No easy way of doing this grep in bash regex :/
 	if LC_ALL=C iwconfig "${IFACE}" | \
-	grep -qE "^ +Encryption key:[*0-9,A-F]"; then
+	grep -Eq "^ +Encryption key:[*0-9,A-F]"; then
 		status="enabled"
 		mode=$(LC_ALL=C iwconfig "${IFACE}" | \
 		sed -n -e 's/^.*Security mode:\(.*[^ ]\).*/\1/p')
@@ -710,7 +709,7 @@ iwconfig_pre_start()
 
 	# Store the fact that tx-power was off so we default to a longer
 	# wait if our scan returns nothing
-	LC_ALL=C iwconfig "${IFACE}" | sed -e '1d' | grep -q "Tx-Power=off"
+	LC_ALL=C iwconfig "${IFACE}" | sed -e '1d' | grep -Fq "Tx-Power=off"
 	local txpowerwasoff=$?
 
 	iwconfig_defaults

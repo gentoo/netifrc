@@ -1365,7 +1365,7 @@
 #	# Test for link on the interface prior to bringing it up.  This
 #	# only works on some network adapters and requires the
 #	# sys-apps/net-tools package to be installed.
-#	if mii-tool "${IFACE}" 2> /dev/null | grep -q 'no link'; then
+#	if mii-tool "${IFACE}" 2> /dev/null | grep -Fq 'no link'; then
 #		ewarn "No link on ${IFACE}, aborting configuration"
 #		return 1
 #	fi
@@ -1373,14 +1373,14 @@
 #	# Test for link on the interface prior to bringing it up.  This
 #	# only works on some network adapters and requires the ethtool
 #	# package to be installed.
-#	if ethtool "${IFACE}" | grep -q 'Link detected: no'; then
+#	if ethtool "${IFACE}" | grep -Fq 'Link detected: no'; then
 #		ewarn "No link on ${IFACE}, aborting configuration"
 #		return 1
 #	fi
 #
 #	# Test to see if we're docked or not and configure like so
 #	# config_docked="dhcp"
-#	if grep -q "1" /sys/devices/platform/dock.0/docked; then
+#	if grep -Fq "1" /sys/devices/platform/dock.0/docked; then
 #       einfo "${IFACE} is docked - configuring"
 #		_configure_variables "docked"
 #	fi
