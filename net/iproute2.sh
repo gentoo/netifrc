@@ -70,19 +70,16 @@ _set_flag()
 
 _get_mac_address()
 {
-	local mac=$(LC_ALL=C ip link show "${IFACE}" | sed -n \
-		-e 'y/abcdef/ABCDEF/' \
-		-e '/link\// s/^.*\<\(..:..:..:..:..:..\)\>.*/\1/p')
+	local mac=
+	read -r mac < /sys/class/net/"${IFACE}"/address || return 1
 
 	case "${mac}" in
-		00:00:00:00:00:00);;
-		44:44:44:44:44:44);;
-		FF:FF:FF:FF:FF:FF);;
-		"");;
-		*) echo "${mac}"; return 0;;
+		00:00:00:00:00:00) return 1 ;;
+		44:44:44:44:44:44) return 1 ;;
+		ff:ff:ff:ff:ff:ff) return 1 ;;
 	esac
 
-	return 1
+	printf '%s\n' "${mac}" | LC_ALL=C tr '[:lower:]' '[:upper:]'
 }
 
 _set_mac_address()
