@@ -1,49 +1,89 @@
 # Copyright (c) 2007-2008 Roy Marples <roy@marples.name>
 # Released under the 2-clause BSD license.
-# shellcheck shell=sh disable=SC1008
 
 apipa_depend()
 {
 	program /sbin/arping /bin/arping
 }
 
-_random()
+_random_bytes_as_int()
 {
-	local r=${RANDOM} # checkbashisms: false positive, we handle it AFTERWARDS
-	if [ -n "${r}" ]; then
-		echo "${r}"
-	else
-		uuidgen | sed -n -e 's/[^[:digit:]]//g' -e 's/\(^.\{1,7\}\).*/\1/p'
-	fi
+	local hex num_bytes="$1"
+
+	# While POSIX does not require that /dev/urandom exist, it is a
+	# de-facto standard. Therefore, the following approach should be
+	# highly portable in practice. In the case of Linux, and unlike BSD
+	# this interface does not block in the event that the CSRNG has not
+	# yet been seeded. Still, this is acceptable because we do not
+	# require a guarantee that the entropy be cryptographically secure.
+	# It's also worth noting that Linux >=5.4 is faster at seeding in
+	# the absence of RDRAND/RDSEED than previous versions were.
+	test -e /dev/urandom &&
+	hex=$(
+		LC_ALL=C tr -dc '[:xdigit:]' < /dev/urandom |
+		dd bs="$(( num_bytes * 2 ))" count=1 2>/dev/null) &&
+	test "${#hex}" = "$(( num_bytes * 2 ))" &&
+	printf '%d\n' "0x${hex}"
+}
+
+_random_apipa_octets()
+{
+	local seed
+
+	# Obtain a highly random 16-bit seed for use by awk's RNG. In the
+	# unlikely event that the seed ends up being empty, awk will seed
+	# based on the time of day, with a granularity of one second.
+	seed=$(_random_bytes_as_int 2)
+
+	# For APIPA (RFC 3927), the 169.254.0.0/16 address block is
+	# reserved. This provides 65534 addresses, having accounted for the
+	# network and broadcast address. Note that we must count from 1.
+	awk "BEGIN {
+		srand($seed)
+		for (i=1; i<65535; i++) print rand() \" \" i
+	}" |
+	sort -k 1,1 -n |
+	POSIXLY_CORRECT=1 awk '{
+		hex = sprintf("%04x",$2)
+		printf("%d %d\n", "0x" substr(hex,1,2), "0x" substr(hex,3,2))
+	}'
 }
 
 apipa_start()
 {
-	local iface="$1" i1= i2= addr= i=0
+	local addr rc
 
-	_exists true || return 1
+	_exists || return
 
 	einfo "Searching for free addresses in 169.254.0.0/16"
 	eindent
 
-	while [ ${i} -lt 64516 ]; do
-		: $(( i1 = (_random % 255) + 1 ))
-		: $(( i2 = (_random % 255) + 1 ))
+	exec 3>&1
+	addr=$(
+		_random_apipa_octets |
+		{
+			while read -r i1 i2; do
+				addr="169.254.${i1}.${i2}"
+				vebegin "${addr}/16" >&3
+				if ! arping_address "${addr}" >&3; then
+					printf '%s\n' "${addr}"
+					exit 0
+				fi
+			done
+			exit 1
+		}
+	)
+	rc=$?
+	exec 3>&-
 
-		addr="169.254.${i1}.${i2}"
-		vebegin "${addr}/16"
-		if ! arping_address "${addr}"; then
-			eval config_${config_index}="\"${addr}/16 broadcast 169.254.255.255\""
-			: $(( config_index -= 1 ))
-			veend 0
-			eoutdent
-			return 0
-		fi
+	if [ "$rc" = 0 ]; then
+		eval "config_${config_index}=\"\${addr}/16 broadcast 169.254.255.255\""
+		: $(( config_index -= 1 ))
+		veend 0
+	else
+		eerror "No free address found!"
+	fi
 
-		: $(( i += 1 ))
-	done
-
-	eerror "No free address found!"
 	eoutdent
-	return 1
+	return "$rc"
 }
