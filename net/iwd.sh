@@ -3,7 +3,6 @@
 
 iwd_depend()
 {
-	need dbus
 	after macnet plug
 	before interface
 	provide wireless
