@@ -36,11 +36,11 @@ _random_apipa_octets()
 	seed=$(_random_bytes_as_int 2)
 
 	# For APIPA (RFC 3927), the 169.254.0.0/16 address block is
-	# reserved. This provides 65534 addresses, having accounted for the
-	# network and broadcast address. Note that we must count from 1.
+	# reserved. This provides 65024 addresses, having accounted for the
+	# fact that the first and last /24 are reserved for future use.
 	awk "BEGIN {
 		srand($seed)
-		for (i=1; i<65535; i++) print rand() \" \" i
+		for (i=256; i<65280; i++) print rand() \" \" i
 	}" |
 	sort -k 1,1 -n |
 	POSIXLY_CORRECT=1 awk '{
