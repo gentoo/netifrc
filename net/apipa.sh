@@ -6,47 +6,42 @@ apipa_depend()
 	program /sbin/arping /bin/arping
 }
 
-_random_bytes_as_int()
+_random_uint16()
 {
-	local hex num_bytes="$1"
-
-	# While POSIX does not require that /dev/urandom exist, it is a
-	# de-facto standard. Therefore, the following approach should be
-	# highly portable in practice. In the case of Linux, and unlike BSD
-	# this interface does not block in the event that the CSRNG has not
-	# yet been seeded. Still, this is acceptable because we do not
-	# require a guarantee that the entropy be cryptographically secure.
-	# It's also worth noting that Linux >=5.4 is faster at seeding in
-	# the absence of RDRAND/RDSEED than previous versions were.
+	# While POSIX does not require that /dev/urandom exist, it is a de-facto
+	# standard. In the case of Linux, and unlike BSD, this interface does
+	# not block in the event that the CSRNG has not yet been seeded.
+	# Still, this is acceptable because we do not require a guarantee that
+	# the entropy be cryptographically secure.
 	test -e /dev/urandom &&
-	hex=$(
-		LC_ALL=C tr -dc '[:xdigit:]' < /dev/urandom |
-		dd bs="$(( num_bytes * 2 ))" count=1 2>/dev/null) &&
-	test "${#hex}" = "$(( num_bytes * 2 ))" &&
-	printf '%d\n' "0x${hex}"
+	printf %d 0x"$(LC_ALL=C od -vAn -N2 -tx1 /dev/urandom | tr -d '[:space:]')"
 }
 
 _random_apipa_octets()
 {
 	local seed
 
-	# Obtain a highly random 16-bit seed for use by awk's RNG. In the
-	# unlikely event that the seed ends up being empty, awk will seed
-	# based on the time of day, with a granularity of one second.
-	seed=$(_random_bytes_as_int 2)
+	# Attempt to generate a random uint16 to seed awk's RNG. The maximum
+	# value of RAND_MAX known to be portable is 32767. Clamp accordingly by
+	# discarding one bit's worth of data. Should the seed turn out to be
+	# empty, we instruct awk to seed based on the time of day, in seconds.
+	seed=$(_random_uint16) && : $(( seed >>= 1 ))
 
 	# For APIPA (RFC 3927), the 169.254.0.0/16 address block is
 	# reserved. This provides 65024 addresses, having accounted for the
 	# fact that the first and last /24 are reserved for future use.
-	awk "BEGIN {
-		srand($seed)
-		for (i=256; i<65280; i++) print rand() \" \" i
-	}" |
-	sort -k 1,1 -n |
-	POSIXLY_CORRECT=1 awk '{
-		hex = sprintf("%04x",$2)
-		printf("%d %d\n", "0x" substr(hex,1,2), "0x" substr(hex,3,2))
-	}'
+	awk -v seed="$seed" 'BEGIN {
+		if (seed != "") {
+			srand(seed)
+		} else {
+			srand()
+		}
+		for (i = 1; i < 255; i++) {
+			for (j = 0; j < 256; j++) {
+				printf("%f %d %d\n", rand(), i, j)
+			}
+		}
+	}' | sort -k 1,1 -n
 }
 
 apipa_start()
@@ -62,11 +57,11 @@ apipa_start()
 	addr=$(
 		_random_apipa_octets |
 		{
-			while read -r i1 i2; do
-				addr="169.254.${i1}.${i2}"
-				vebegin "${addr}/16" >&3
-				if ! arping_address "${addr}" >&3; then
-					printf '%s\n' "${addr}"
+			while read -r f1 f2 f3; do
+				next_addr="169.254.$f2.$f3"
+				vebegin "$next_addr/16" >&3
+				if ! arping_address "$next_addr" >&3; then
+					printf %s "$next_addr"
 					exit 0
 				fi
 			done
