@@ -164,7 +164,7 @@ _netns()
 		case "${1}" in
 			ip)
 				shift
-				"${ip}" "${@}"
+				ip "${@}"
 			;;
 			glob)
 				shift
