@@ -1275,7 +1275,7 @@
 #ethtool_pause_eth0="autoneg off
 #rx on tx on"
 
-# Enasble adaptive RX and TX coalescing
+# Enable adaptive RX and TX coalescing
 #ethtool_coalesce_eth0="adaptive-rx on adaptive-tx on"
 
 # Change ring buffer settings
