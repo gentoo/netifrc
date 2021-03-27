@@ -1275,11 +1275,17 @@
 #ethtool_pause_eth0="autoneg off
 #rx on tx on"
 
+# Enable Energy-Efficient Ethernet
+#ethtool_eee_eth0="eee on"
+
 # Enable adaptive RX and TX coalescing
 #ethtool_coalesce_eth0="adaptive-rx on adaptive-tx on"
 
 # Change ring buffer settings
 #ethtool_ring_eth0=""
+
+# Set RX copy-break at 1500 bytes
+#ethtool_tunable_eth0="rx-copybreak 1500"
 
 # Enable all offload settings
 #ethtool_offload_eth0="rx on tx on sg on tso on ufo on gso on gro on lro on"
@@ -1309,13 +1315,13 @@
 
 # Additionally, there is a special control variable, if you need to change the
 # order of option processing. The default order is:
-# flash change-eeprom change pause coalesce ring offload identify nfc rxfh-indir ntuple
+# flash change-eeprom change pause eee coalesce ring offload tunable identify nfc rxfh-indir ntuple
 
 # Set global order to default
-#ethtool_order="flash change-eeprom change pause coalesce ring offload identify nfc rxfh-indir ntuple"
+#ethtool_order="flash change-eeprom change pause eee coalesce ring offload tunable identify nfc rxfh-indir ntuple"
 
 # Hypothetical network card that requires a change-eeprom toggle to enable flashing
-#ethtool_order_eth0="change-eeprom flash change pause coalesce ring offload nfc rxfh-indir ntuple"
+#ethtool_order_eth0="change-eeprom flash change pause eee coalesce ring offload tunable nfc rxfh-indir ntuple"
 
 #-----------------------------------------------------------------------------
 # Firewalld support
