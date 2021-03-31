@@ -91,10 +91,9 @@ _set_flag()
 _get_mac_address()
 {
 	local mac=
-	read -r mac < /sys/class/net/"${IFACE}"/address || return 1
-	local mac=$(LC_ALL=C _ip link show "${IFACE}" | sed -n \
+	mac=$(LC_ALL=C _ip link show "${IFACE}" | sed -n \
 		-e 'y/abcdef/ABCDEF/' \
-		-e '/link\// s/^.*\<\(..:..:..:..:..:..\)\>.*/\1/p')
+		-e '/link\// s/^.*\<\(..:..:..:..:..:..\)\>.*/\1/p' | head -n1)
 
 	case "${mac}" in
 		00:00:00:00:00:00) return 1 ;;
