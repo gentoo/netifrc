@@ -225,9 +225,9 @@ _configure_variables()
 	for var in ${_config_vars}; do
 		local v=
 		for t; do
-			eval v=\$${var}_${t}
+			eval v="\"\$${var}_${t}\""
 			if [ -n "${v}" ]; then
-				eval ${var}_${IFVAR}=\$${var}_${t}
+				eval "${var}_${IFVAR}=\"\$${var}_${t}\""
 				continue 2
 			fi
 		done
