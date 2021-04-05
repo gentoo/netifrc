@@ -1318,10 +1318,10 @@
 # flash change-eeprom change pause eee coalesce ring offload tunable identify nfc rxfh-indir ntuple
 
 # Set global order to default
-#ethtool_order="flash change-eeprom change pause eee coalesce ring offload tunable identify nfc rxfh-indir ntuple"
+#ethtool_order="flash change-eeprom change priv-flags channels dump pause eee fec coalesce per-queue ring offload features phy-tunable tunable identify nfc rxfh-indir ntuple"
 
-# Hypothetical network card that requires a change-eeprom toggle to enable flashing
-#ethtool_order_eth0="change-eeprom flash change pause eee coalesce ring offload tunable nfc rxfh-indir ntuple"
+# Hypothetical network card that requires a change-eeprom or priv-flags toggle to enable flashing
+#ethtool_order_eth0="priv-flags change-eeprom flash channels dump pause eee fec coalesce per-queue ring offload features phy-tunable tunable identify nfc rxfh-indir ntuple"
 
 #-----------------------------------------------------------------------------
 # Firewalld support
