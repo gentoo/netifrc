@@ -35,8 +35,6 @@ prp_pre_start()
 	fi
 
 	ebegin "Creating PRP interface ${IFACE}"
-	# FIXME: detect if HSR functionality is availabl in kernel, if not, attempt to load the hsr module.
-	modprobe hsr
 	cmd="ip link add name "${IFACE}" type hsr slave1 ${prp_slave1} slave2 ${prp_slave2} ${prp_supervision:+supervision }${prp_supervision} proto 1"
 	veinfo $cmd
 	if $cmd ; then
