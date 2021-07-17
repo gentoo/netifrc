@@ -91,17 +91,15 @@ _set_flag()
 _get_mac_address()
 {
 	local mac=
-	mac=$(LC_ALL=C _ip link show "${IFACE}" | sed -n \
-		-e 'y/abcdef/ABCDEF/' \
-		-e '/link\// s/^.*\<\(..:..:..:..:..:..\)\>.*/\1/p' | head -n1)
+	mac=$(_netns sed -e 'y/abcdef/ABCDEF/;q' /sys/class/net/"${IFACE}"/address) || return
 
 	case "${mac}" in
-		00:00:00:00:00:00) return 1 ;;
-		44:44:44:44:44:44) return 1 ;;
-		ff:ff:ff:ff:ff:ff) return 1 ;;
-	esac
-
-	printf '%s\n' "${mac}" | LC_ALL=C tr '[:lower:]' '[:upper:]'
+		'')                false ;;
+		00:00:00:00:00:00) false ;;
+		44:44:44:44:44:44) false ;;
+		FF:FF:FF:FF:FF:FF) false ;;
+	esac &&
+	printf '%s\n' "${mac}"
 }
 
 _set_mac_address()
