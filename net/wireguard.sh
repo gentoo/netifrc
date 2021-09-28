@@ -9,9 +9,15 @@ wireguard_depend()
 	after interface
 }
 
+_is_wireguard() {
+	is_interface_type wireguard
+}
+
 wireguard_pre_start()
 {
-	[ "${IFACE#wg}" != "$IFACE" ] || return 0
+	local wireguard=
+	eval wireguard=\$type_${IFVAR}
+	[ "${wireguard}" = "wireguard" -o "${IFACE#wg}" != "$IFACE" ] || return 0
 
 	ip link delete dev "$IFACE" type wireguard 2>/dev/null
 	ebegin "Creating WireGuard interface $IFACE"
@@ -35,6 +41,7 @@ wireguard_pre_start()
 		e=$?
 		if [ $e -eq 0 ]; then
 			eend $e
+			set_interface_type wireguard
 			return $e
 		fi
 	fi
@@ -45,7 +52,7 @@ wireguard_pre_start()
 
 wireguard_post_stop()
 {
-	[ "${IFACE#wg}" != "$IFACE" ] || return 0
+	_is_wireguard || [ "${IFACE#wg}" != "$IFACE" ] || return 0
 
 	ebegin "Removing WireGuard interface $IFACE"
 	ip link delete dev "$IFACE" type wireguard
