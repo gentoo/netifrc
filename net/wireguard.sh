@@ -5,7 +5,7 @@
 
 wireguard_depend()
 {
-	program wg
+	program ip wg
 	before interface
 }
 
