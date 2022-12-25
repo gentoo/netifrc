@@ -21,6 +21,8 @@ hsr_pre_start()
 	eval hsr_slave1=\$hsr_slave1_${IFVAR}
 	eval hsr_slave2=\$hsr_slave2_${IFVAR}
 	eval hsr_supervision=\$hsr_supervision_${IFVAR}
+	eval hsr_version=\$hsr_version_${IFVAR}
+	eval hsr_proto=\$hsr_proto_${IFVAR}
 	if [ -z "${hsr_slave1}" ] || [ -z "${hsr_slave2}" ]; then
 		eerror "HSR interfaces require two slave interfaces to be set"
 		return 1
@@ -35,7 +37,10 @@ hsr_pre_start()
 	fi
 
 	ebegin "Creating HSR interface ${IFACE}"
-	cmd="ip link add name "${IFACE}" type hsr slave1 ${hsr_slave1} slave2 ${hsr_slave2} ${hsr_supervision:+supervision }${hsr_supervision}"
+	cmd="ip link add name "${IFACE}" type hsr slave1 ${hsr_slave1} slave2 ${hsr_slave2}"
+	test -n "${hsr_supervision}" && cmd="${cmd} supervision ${hsr_supervision}"
+	test -n "${hsr_version}" && cmd="${cmd} version ${hsr_version}"
+	test -n "${hsr_proto}" && cmd="${cmd} proto ${hsr_proto}"
 	veinfo $cmd
 	if $cmd ; then
 		eend 0 && _up && set_interface_type hsr
