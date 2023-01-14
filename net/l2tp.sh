@@ -7,14 +7,92 @@
 # Also, SC2034 and SC2316 are muted because they produce false-positives.
 # shellcheck shell=sh disable=SC3043,SC2034,SC2316
 
-l2tp_depend()
-{
+l2tp_depend() {
 	program ip
 	before bridge interface macchanger
 }
 
-_l2tp_parse_opts()
-{
+l2tp_pre_start() {
+	local declared_session declared_tunnel l2tpsession l2tptunnel
+	local name peer_session_id session_id tunnel_id
+	local encap local peer_tunnel_id remote
+	local key
+
+	if key="l2tpsession_${IFVAR:?}"; ! eval "[ \${${key}+set} ]"; then
+		return
+	elif eval "l2tpsession=\$${key}"; _is_blank "${l2tpsession}"; then
+		eend 1 "${key} is defined but its value is blank"
+	elif ! declared_session=$(_l2tp_parse_opts "${l2tpsession}" "peer_session_id session_id tunnel_id" "name"); then
+		eend 1 "${key} is missing at least one required parameter"
+	elif eval "${declared_session}"; [ "${name+set}" ]; then
+		eend 1 "${key} defines a \"name\" parameter, which is forbidden by netifrc"
+	elif ! modprobe l2tp_eth; then
+		eend 1 "Couldn't load the l2tp_eth module (perhaps the CONFIG_L2TP_ETH kernel option is disabled)"
+	elif key="l2tptunnel_${IFVAR}"; eval "[ \${${key}+set} ]"; then
+		if eval "l2tptunnel=\$${key}"; _is_blank "${l2tptunnel}"; then
+			eend 1 "${key} is defined but its value is blank"
+		elif ! declared_tunnel=$(_l2tp_parse_opts "${l2tptunnel}" "local peer_tunnel_id remote tunnel_id" "encap"); then
+			eend 1 "${key} is missing at least one required parameter"
+		elif set -- "${tunnel_id}"; eval "${declared_tunnel}"; [ "$1" != "${tunnel_id}" ]; then
+			eend 1 "${key} defines a \"tunnel_id\" parameter that contradicts l2tpsession_${IFVAR}"
+		elif _l2tp_should_add_tunnel "${tunnel_id}" "${declared_tunnel}"; set -- $?; [ "$1" -eq 2 ]; then
+			eend 1 "Tunnel #${tunnel_id} exists but its properties mismatch those defined by ${key}"
+		elif [ "$1" -eq 1 ]; then
+			# The config matches an existing tunnel.
+			true
+		elif [ "${encap}" = ip ] && ! modprobe l2tp_ip; then
+			eend 1 "Couldn't load the l2tp_ip module (perhaps the CONFIG_L2TP_IP kernel option is disabled)"
+		else
+			ebegin "Creating L2TPv3 tunnel (tunnel_id ${tunnel_id})"
+			printf %s "l2tp add tunnel ${l2tptunnel}" \
+			| xargs -E '' ip
+			eend $?
+		fi
+	elif ! _l2tp_has_tunnel "${tunnel_id}"; then
+		# A tunnel may incorporate more than one session (link). This
+		# module allows for the user not to define a tunnel for a given
+		# session. In that case, it will be expected that the required
+		# tunnel has already been created to satisfy some other session.
+		eend 1 "Tunnel #${tunnel_id} not found (defining ${key} may be required)"
+	fi || return
+
+	ebegin "Creating L2TPv3 session (session_id ${session_id} tunnel_id ${tunnel_id})"
+	printf %s "l2tp add session ${l2tpsession} name ${IFACE:?}" \
+	| xargs -E '' ip && _up
+	eend $?
+}
+
+l2tp_post_stop() {
+	local existing_session session_id tunnel_id
+
+	# This function may be invoked for every interface. If not a virtual
+	# interface, it can't possibly be one that's managed by this module, in
+	# which case running ip(8) and awk(1) would be a needless expense.
+	[ -e /sys/devices/virtual/net/"${IFACE:?}" ] \
+	&& existing_session=$(_l2tp_parse_existing_session 2>/dev/null) \
+	|| return 0
+
+	eval "${existing_session}"
+	set -- session_id "${session_id}" tunnel_id "${tunnel_id}"
+	ebegin "Destroying L2TPv3 session ($*)"
+	ip l2tp del session "$@"
+	eend $? &&
+	if ! _l2tp_in_session "${tunnel_id}"; then
+		shift 2
+		ebegin "Destroying L2TPv3 tunnel ($*)"
+		ip l2tp del tunnel "$@"
+		eend $?
+	fi
+}
+
+_is_blank() (
+	LC_CTYPE=C
+	case $1 in
+		*[![:blank:]]*) return 1
+	esac
+)
+
+_l2tp_parse_opts() {
 	# Parses lt2psession or l2tptunnel options using xargs(1), conveying
 	# them as arguments to awk(1). The awk program interprets the arguments
 	# as a series of key/value pairs and safely prints those specified as
@@ -151,86 +229,4 @@ _l2tp_in_session() {
 		done
 	}
 	return 1
-}
-
-_is_blank() (
-	LC_CTYPE=C
-	case $1 in
-		*[![:blank:]]*) return 1
-	esac
-)
-
-l2tp_pre_start()
-{
-	local declared_session declared_tunnel l2tpsession l2tptunnel
-	local name peer_session_id session_id tunnel_id
-	local encap local peer_tunnel_id remote
-	local key
-
-	if key="l2tpsession_${IFVAR:?}"; ! eval "[ \${${key}+set} ]"; then
-		return
-	elif eval "l2tpsession=\$${key}"; _is_blank "${l2tpsession}"; then
-		eend 1 "${key} is defined but its value is blank"
-	elif ! declared_session=$(_l2tp_parse_opts "${l2tpsession}" "peer_session_id session_id tunnel_id" "name"); then
-		eend 1 "${key} is missing at least one required parameter"
-	elif eval "${declared_session}"; [ "${name+set}" ]; then
-		eend 1 "${key} defines a \"name\" parameter, which is forbidden by netifrc"
-	elif ! modprobe l2tp_eth; then
-		eend 1 "Couldn't load the l2tp_eth module (perhaps the CONFIG_L2TP_ETH kernel option is disabled)"
-	elif key="l2tptunnel_${IFVAR}"; eval "[ \${${key}+set} ]"; then
-		if eval "l2tptunnel=\$${key}"; _is_blank "${l2tptunnel}"; then
-			eend 1 "${key} is defined but its value is blank"
-		elif ! declared_tunnel=$(_l2tp_parse_opts "${l2tptunnel}" "local peer_tunnel_id remote tunnel_id" "encap"); then
-			eend 1 "${key} is missing at least one required parameter"
-		elif set -- "${tunnel_id}"; eval "${declared_tunnel}"; [ "$1" != "${tunnel_id}" ]; then
-			eend 1 "${key} defines a \"tunnel_id\" parameter that contradicts l2tpsession_${IFVAR}"
-		elif _l2tp_should_add_tunnel "${tunnel_id}" "${declared_tunnel}"; set -- $?; [ "$1" -eq 2 ]; then
-			eend 1 "Tunnel #${tunnel_id} exists but its properties mismatch those defined by ${key}"
-		elif [ "$1" -eq 1 ]; then
-			# The config matches an existing tunnel.
-			true
-		elif [ "${encap}" = ip ] && ! modprobe l2tp_ip; then
-			eend 1 "Couldn't load the l2tp_ip module (perhaps the CONFIG_L2TP_IP kernel option is disabled)"
-		else
-			ebegin "Creating L2TPv3 tunnel (tunnel_id ${tunnel_id})"
-			printf %s "l2tp add tunnel ${l2tptunnel}" \
-			| xargs -E '' ip
-			eend $?
-		fi
-	elif ! _l2tp_has_tunnel "${tunnel_id}"; then
-		# A tunnel may incorporate more than one session (link). This
-		# module allows for the user not to define a tunnel for a given
-		# session. In that case, it will be expected that the required
-		# tunnel has already been created to satisfy some other session.
-		eend 1 "Tunnel #${tunnel_id} not found (defining ${key} may be required)"
-	fi || return
-
-	ebegin "Creating L2TPv3 session (session_id ${session_id} tunnel_id ${tunnel_id})"
-	printf %s "l2tp add session ${l2tpsession} name ${IFACE:?}" \
-	| xargs -E '' ip && _up
-	eend $?
-}
-
-l2tp_post_stop()
-{
-	local existing_session session_id tunnel_id
-
-	# This function may be invoked for every interface. If not a virtual
-	# interface, it can't possibly be one that's managed by this module, in
-	# which case running ip(8) and awk(1) would be a needless expense.
-	[ -e /sys/devices/virtual/net/"${IFACE:?}" ] \
-	&& existing_session=$(_l2tp_parse_existing_session 2>/dev/null) \
-	|| return 0
-
-	eval "${existing_session}"
-	set -- session_id "${session_id}" tunnel_id "${tunnel_id}"
-	ebegin "Destroying L2TPv3 session ($*)"
-	ip l2tp del session "$@"
-	eend $? &&
-	if ! _l2tp_in_session "${tunnel_id}"; then
-		shift 2
-		ebegin "Destroying L2TPv3 tunnel ($*)"
-		ip l2tp del tunnel "$@"
-		eend $?
-	fi
 }
