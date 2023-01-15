@@ -39,7 +39,7 @@ l2tp_pre_start() {
 	elif ! declared_tunnel=$(_l2tp_parse_opts "${l2tptunnel}" "local peer_tunnel_id remote tunnel_id" "encap"); then
 		eend 1 "${key} is missing at least one required parameter"
 	elif set -- "${tunnel_id}"; eval "${declared_tunnel}"; [ "$1" != "${tunnel_id}" ]; then
-		eend 1 "${key} defines a \"tunnel_id\" parameter that contradicts l2tpsession_${IFNAME}"
+		eend 1 "${key} defines a \"tunnel_id\" parameter that contradicts l2tpsession_${IFACE:?}"
 	elif _l2tp_should_add_tunnel "${tunnel_id}" "${declared_tunnel}"; set -- $?; [ "$1" -eq 2 ]; then
 		eend 1 "Tunnel #${tunnel_id} exists but its properties mismatch those defined by ${key}"
 	elif [ "$1" -eq 1 ]; then
