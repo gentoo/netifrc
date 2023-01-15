@@ -28,32 +28,30 @@ l2tp_pre_start() {
 		eend 1 "${key} defines a \"name\" parameter, which is forbidden by netifrc"
 	elif ! modprobe l2tp_eth; then
 		eend 1 "Couldn't load the l2tp_eth module (perhaps the CONFIG_L2TP_ETH kernel option is disabled)"
-	elif key="l2tptunnel_${IFVAR}"; eval "[ \${${key}+set} ]"; then
-		if eval "l2tptunnel=\$${key}"; _is_blank "${l2tptunnel}"; then
-			eend 1 "${key} is defined but its value is blank"
-		elif ! declared_tunnel=$(_l2tp_parse_opts "${l2tptunnel}" "local peer_tunnel_id remote tunnel_id" "encap"); then
-			eend 1 "${key} is missing at least one required parameter"
-		elif set -- "${tunnel_id}"; eval "${declared_tunnel}"; [ "$1" != "${tunnel_id}" ]; then
-			eend 1 "${key} defines a \"tunnel_id\" parameter that contradicts l2tpsession_${IFVAR}"
-		elif _l2tp_should_add_tunnel "${tunnel_id}" "${declared_tunnel}"; set -- $?; [ "$1" -eq 2 ]; then
-			eend 1 "Tunnel #${tunnel_id} exists but its properties mismatch those defined by ${key}"
-		elif [ "$1" -eq 1 ]; then
-			# The config matches an existing tunnel.
-			true
-		elif [ "${encap}" = ip ] && ! modprobe l2tp_ip; then
-			eend 1 "Couldn't load the l2tp_ip module (perhaps the CONFIG_L2TP_IP kernel option is disabled)"
-		else
-			ebegin "Creating L2TPv3 tunnel (tunnel_id ${tunnel_id})"
-			printf %s "l2tp add tunnel ${l2tptunnel}" \
-			| xargs -E '' ip
-			eend $?
-		fi
-	elif ! _l2tp_has_tunnel "${tunnel_id}"; then
+	elif key="l2tptunnel_${IFVAR}"; ! eval "[ \${${key}+set} ]" && ! _l2tp_has_tunnel "${tunnel_id}"; then
 		# A tunnel may incorporate more than one session (link). This
 		# module allows for the user not to define a tunnel for a given
 		# session. In that case, it will be expected that the required
 		# tunnel has already been created to satisfy some other session.
 		eend 1 "Tunnel #${tunnel_id} not found (defining ${key} may be required)"
+	elif eval "l2tptunnel=\$${key}"; _is_blank "${l2tptunnel}"; then
+		eend 1 "${key} is defined but its value is blank"
+	elif ! declared_tunnel=$(_l2tp_parse_opts "${l2tptunnel}" "local peer_tunnel_id remote tunnel_id" "encap"); then
+		eend 1 "${key} is missing at least one required parameter"
+	elif set -- "${tunnel_id}"; eval "${declared_tunnel}"; [ "$1" != "${tunnel_id}" ]; then
+		eend 1 "${key} defines a \"tunnel_id\" parameter that contradicts l2tpsession_${IFVAR}"
+	elif _l2tp_should_add_tunnel "${tunnel_id}" "${declared_tunnel}"; set -- $?; [ "$1" -eq 2 ]; then
+		eend 1 "Tunnel #${tunnel_id} exists but its properties mismatch those defined by ${key}"
+	elif [ "$1" -eq 1 ]; then
+		# The config matches an existing tunnel.
+		true
+	elif [ "${encap}" = ip ] && ! modprobe l2tp_ip; then
+		eend 1 "Couldn't load the l2tp_ip module (perhaps the CONFIG_L2TP_IP kernel option is disabled)"
+	else
+		ebegin "Creating L2TPv3 tunnel (tunnel_id ${tunnel_id})"
+		printf %s "l2tp add tunnel ${l2tptunnel}" \
+		| xargs -E '' ip
+		eend $?
 	fi || return
 
 	ebegin "Creating L2TPv3 session (session_id ${session_id} tunnel_id ${tunnel_id})"
