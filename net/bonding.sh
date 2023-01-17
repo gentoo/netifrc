@@ -92,7 +92,7 @@ bonding_pre_start()
 		if [ -n "${s}" ]; then
 			for i in $s; do
 				einfo "Adding ${n}: ${i}"
-				_netns echo "+${i/+/}" \>"${x}" || \
+				_netns echo "+${i#+}" \>"${x}" || \
 				eerror "Failed to add $i (${n}_${IFVAR})"
 			done
 		fi
