@@ -132,7 +132,7 @@ veth_pre_start()
 
 	local createveth
 	eval createveth=\$veth_${IFVAR}_create
-	if [ "$createveth" == "no" ]; then
+	if [ "$createveth" = "no" ]; then
 		return 0
 	fi
 
