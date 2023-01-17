@@ -57,7 +57,7 @@ wpa_supplicant_pre_start()
 	[ -z "${cliopts}" ] && cliopts=${wpa_cli}
 	set -- $opts
 	local opt_D
-	while [ ${#*} -gt 0 ]; do
+	while [ "$#" -gt 0 ]; do
 		local opt=$1 ; shift
 		case "$opt" in
 			-D) opt_D=${1} ; shift ;;
