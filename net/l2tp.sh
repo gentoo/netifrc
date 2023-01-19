@@ -28,12 +28,14 @@ l2tp_pre_start() {
 		eend 1 "${key} defines a \"name\" parameter, which is forbidden by netifrc"
 	elif ! modprobe l2tp_eth; then
 		eend 1 "Couldn't load the l2tp_eth module (perhaps the CONFIG_L2TP_ETH kernel option is disabled)"
-	elif key="l2tptunnel_${IFVAR}"; ! eval "[ \${${key}+set} ]" && ! _l2tp_has_tunnel "${tunnel_id}"; then
+	elif key="l2tptunnel_${IFVAR}"; ! eval "[ \${${key}+set} ]"; then
 		# A tunnel may incorporate more than one session (link). This
 		# module allows for the user not to define a tunnel for a given
 		# session. In that case, it will be expected that the required
 		# tunnel has already been created to satisfy some other session.
-		eend 1 "Tunnel #${tunnel_id} not found (defining ${key} may be required)"
+		if ! _l2tp_has_tunnel "${tunnel_id}"; then
+			eend 1 "Tunnel #${tunnel_id} not found (defining ${key} may be required)"
+		fi
 	elif eval "l2tptunnel=\$${key}"; _is_blank "${l2tptunnel}"; then
 		eend 1 "${key} is defined but its value is blank"
 	elif ! declared_tunnel=$(_l2tp_parse_opts "${l2tptunnel}" "local peer_tunnel_id remote tunnel_id" "encap"); then
