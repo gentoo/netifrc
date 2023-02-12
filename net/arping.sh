@@ -4,7 +4,7 @@
 
 arping_depend()
 {
-	program /sbin/arping /bin/arping /usr/sbin/arping /usr/sbin/arping2
+	program /sbin/arping /bin/arping /usr/bin/arping /usr/sbin/arping /usr/sbin/arping2
 	before interface
 }
 
