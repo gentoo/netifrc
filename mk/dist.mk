@@ -4,18 +4,18 @@
 
 GITREF?=	HEAD
 DISTPREFIX?=	${NAME}-${VERSION}
-DISTFILE?=	${DISTPREFIX}.tar.bz2
+DISTFILE?=	${DISTPREFIX}.tar.xz
 
-CLEANFILES+=	${NAME}-*.tar.bz2
+CLEANFILES+=	${NAME}-*.tar.xz
 
 _SNAP_SH=	date -u +%Y%m%d%H%M
 _SNAP:=		$(shell ${_SNAP_SH})
 SNAP=		${_SNAP}
 SNAPDIR=	${DISTPREFIX}-${SNAP}
-SNAPFILE=	${SNAPDIR}.tar.bz2
+SNAPFILE=	${SNAPDIR}.tar.xz
 
 gitdist:
-	git archive --prefix=${DISTPREFIX}/ ${GITREF} | bzip2 > ${DISTFILE}
+	git archive --prefix=${DISTPREFIX}/ ${GITREF} | xz > ${DISTFILE}
 
 dist:
 	sh -c ' \
