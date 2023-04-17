@@ -23,12 +23,12 @@ dist:
 	mkdir $${D}/${DISTPREFIX} && \
 	git checkout-index -f -a --prefix=$${D}/${DISTPREFIX}/ && \
 	git log >$${D}/${DISTPREFIX}/ChangeLog && \
-	tar cjf ${DISTFILE} --owner=0 --group=0 --format=posix --mode=a+rX -C $$D ${DISTPREFIX} && \
+	gtar cjf ${DISTFILE} --owner=0 --group=0 --format=posix --mode=a+rX -C $$D ${DISTPREFIX} && \
 	rm -rf $$D '
 
 distcheck: dist
 	rm -rf ${DISTPREFIX}
-	tar xf ${DISTFILE}
+	gtar xf ${DISTFILE}
 	MAKEFLAGS= $(MAKE) -C ${DISTPREFIX}
 	MAKEFLAGS= $(MAKE) -C ${DISTPREFIX} check
 	rm -rf ${DISTPREFIX}
@@ -39,7 +39,7 @@ snapshot:
 	cp -RPp * /tmp/${SNAPDIR}
 	(cd /tmp/${SNAPDIR}; make clean)
 	find /tmp/${SNAPDIR} -name .svn -exec rm -rf -- {} \; 2>/dev/null || true
-	tar -cvjpf ${SNAPFILE} -C /tmp ${SNAPDIR}
+	gtar -cvjpf ${SNAPFILE} -C /tmp ${SNAPDIR}
 	rm -rf /tmp/${SNAPDIR}
 	ls -l ${SNAPFILE}
 
