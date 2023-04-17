@@ -32,7 +32,7 @@ dhcpcd_start()
 	[ -z "${opts}" ] && opts=${dhcp}
 
 	case "$(dhcpcd --version | head -n 1)" in
-		"dhcpcd "[123]*)
+		"dhcpcd "[123]\.*)
 			eerror 'The dhcpcd version is too old. Please upgrade.'
 			return 1
 			;;
