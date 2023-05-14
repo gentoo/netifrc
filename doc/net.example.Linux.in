@@ -1133,6 +1133,19 @@
 #config_l2tpeth2="10.100.2.1/24"
 
 #-----------------------------------------------------------------------------
+# QMI
+# For QMI support, emerge net-libs/libqmi
+# QMI is used for some cellular modems.
+#
+# Each QMI interface may have the following configuration:
+#qmi_apn_wwan0=				# The name of the APN
+#qmi_auth_wwan0=			# none, pop, chap, both, Default: none
+#qmi_username_wwan0=			# Default: dummy
+#qmi_password_wwan0=			# Default dummy
+#qmi_cdc_wwan0=				# Default: /dev/cdc-wmiX where X is taken from IFACE
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
 # Advanced Routing
 # WARNING: For advanced routing you MUST be using sys-apps/iproute2
 #
