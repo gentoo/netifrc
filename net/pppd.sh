@@ -1,11 +1,11 @@
-# Copyright (c) 2005-2007 Gentoo Foundation
+# Copyright (c) 2005-2023 Gentoo Authors
 # Copyright (c) 2007-2008 Roy Marples <roy@marples.name>
 # Released under the 2-clause BSD license.
 # shellcheck shell=sh disable=SC1008
 
 pppd_depend()
 {
-	program /usr/sbin/pppd
+	program pppd
 	after interface
 	before dhcp
 	provide ppp
@@ -21,12 +21,28 @@ requote()
 	printf "'%s' " "$@"
 }
 
+pppd_version_int() {
+	# 002004008 is v2.4.8
+	printf '%03d' $(pppd --version | awk '/pppd version/ {print $3}' | tr '.' ' ')
+}
+
 pppd_is_ge_248()
 {
-	local ver_str="$(/usr/sbin/pppd --version 2>&1 | awk '/pppd version/ {print $3}' | tr '.' ' ')"
+	[ $(pppd_version_int) -ge 002004008 ]
+}
 
-	# 002004008 is v2.4.8
-	[ "$(printf '%03d' ${ver_str})" -ge 002004008 ]
+pppd_is_ge_250()
+{
+	[ $(pppd_version_int) -ge 002005000 ]
+}
+
+pppd_pidfile()
+{
+	if pppd_is_ge_250; then
+		echo "/run/ppp/ppp-${IFACE}.pid"
+	else
+		echo "/run/ppp-${IFACE}.pid"
+	fi
 }
 
 pppd_pre_start()
@@ -207,16 +223,18 @@ pppd_pre_start()
 	fi
 	[ "${insert_link_in_opts}" = "0" ] || opts="${link} ${opts}"
 
+	local pidfile="$(pppd_pidfile)"
+
 	ebegin "Starting pppd in ${IFACE}"
 	mark_service_inactive
 	if [ -n "${username}" ] \
 	&& [ -n "${password}" -o -z "${passwordset}" ]; then
 		printf "%s" "${password}" | \
 		eval start-stop-daemon --start --exec /usr/sbin/pppd \
-			--pidfile "/run/ppp-${IFACE}.pid" -- "${opts}" >/dev/null
+			--pidfile "${pidfile}" -- "${opts}" >/dev/null
 	else
 		eval start-stop-daemon --start --exec /usr/sbin/pppd \
-			--pidfile "/run/ppp-${IFACE}.pid" -- "${opts}" >/dev/null
+			--pidfile "${pidfile}" -- "${opts}" >/dev/null
 	fi
 
 	if ! eend $? "Failed to start PPP"; then
@@ -243,7 +261,7 @@ pppd_start()
 pppd_stop()
 {
 	yesno ${IN_BACKGROUND} && return 0
-	local pidfile="/run/ppp-${IFACE}.pid"
+	local pidfile="$(pppd_pidfile)"
 
 	[ ! -s "${pidfile}" ] && return 0
 
