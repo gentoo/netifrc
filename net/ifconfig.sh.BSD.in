@@ -4,7 +4,7 @@
 
 ifconfig_depend()
 {
-	program /sbin/ifconfig
+	program ifconfig
 	provide interface
 }
 

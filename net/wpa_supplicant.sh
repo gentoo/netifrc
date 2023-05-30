@@ -42,13 +42,9 @@ fi
 wpa_supplicant_pre_start()
 {
 	local opts= cliopts= cfgfile= ctrl_dir= wireless=true
-	local wpas=/usr/sbin/wpa_supplicant wpac=/usr/bin/wpa_cli
+	local wpas=wpa_supplicant wpac=wpa_cli
 	local actfile=/etc/wpa_supplicant/wpa_cli.sh
 
-	if [ ! -x "${wpas}" ]; then
-		wpas=/sbin/wpa_supplicant
-		wpac=/bin/wpa_cli
-	fi
 	[ "${RC_UNAME}" = "Linux" ] || unset wpac
 	[ -e "${actfile}" ] || unset wpac
 
@@ -182,12 +178,7 @@ wpa_supplicant_pre_start()
 
 wpa_supplicant_post_stop()
 {
-	local wpas=/usr/sbin/wpa_supplicant wpac=/usr/bin/wpa_cli
-
-	if [ ! -x "${wpas}" ]; then
-		wpas=/sbin/wpa_supplicant
-		wpac=/bin/wpa_cli
-	fi
+	local wpas=wpa_supplicant wpac=wpa_cli
 
 	if yesno "${IN_BACKGROUND}"; then
 		# Only stop wpa_supplicant if it's not the controlling daemon

@@ -4,7 +4,7 @@
 
 arping_depend()
 {
-	program /sbin/arping /bin/arping /usr/bin/arping /usr/sbin/arping /usr/sbin/arping2
+	program arping arping2
 	before interface
 }
 
@@ -26,7 +26,7 @@ arping_address()
 	eval w=\$arping_wait_${IFVAR}
 	[ -z "${w}" ] && w=${arping_wait:-5}
 
-	if type arping2 >/dev/null 2>&1; then
+	if command -v arping2 >/dev/null; then
 		if [ -n "${spoof}" ]; then
 			opts="${opts} -S ${spoof}"
 		else

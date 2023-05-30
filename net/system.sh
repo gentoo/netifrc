@@ -46,7 +46,7 @@ _system_dns()
 	[ -n "${options}" ] && buffer="${buffer}options ${options}\n"
 
 	# Support resolvconf if we have it.
-	if [ -x /sbin/resolvconf ]; then
+	if command -v resolvconf >/dev/null; then
 		x="-a ${IFACE}"
 		eval imetric=\${metric_${IFVAR}}
 		if [ -n "${imetric}" ]; then

@@ -4,7 +4,7 @@
 dhclientv6_depend()
 {
 	after interface
-	program start /sbin/dhclient
+	program start dhclient
 	provide dhcpv6
 }
 
@@ -50,7 +50,7 @@ dhclientv6_start()
 
 	# Bring up DHCP for this interface
 	ebegin "Running dhclient -6"
-	echo "${dhconf}" | start-stop-daemon --start --exec /sbin/dhclient \
+	echo "${dhconf}" | start-stop-daemon --start --exec dhclient \
 		--pidfile "${pidfile}" \
 		-- -6 ${args} -q -1 -pf "${pidfile}" "${IFACE}"
 	eend $? || return 1
@@ -65,7 +65,7 @@ dhclientv6_stop()
 	[ ! -f "${pidfile}" ] && return 0
 
 	# Get our options
-	if [ -x /sbin/dhclient ]; then
+	if command -v dhclient >/dev/null; then
 		eval opts=\$dhcp_${IFVAR}
 		[ -z "${opts}" ] && opts=${dhcp}
 	fi
@@ -75,7 +75,7 @@ dhclientv6_stop()
 		*" release "*) dhclient -6 -q -r -pf "${pidfile}" "${IFACE}";;
 		*)
 			start-stop-daemon --stop --quiet \
-				--exec /sbin/dhclient --pidfile "${pidfile}"
+				--exec dhclient --pidfile "${pidfile}"
 			;;
 	esac
 	eend $?

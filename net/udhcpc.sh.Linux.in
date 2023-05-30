@@ -4,7 +4,7 @@
 
 udhcpc_depend()
 {
-	program start /bin/busybox
+	program start busybox
 	after interface
 	provide dhcp
 }
@@ -56,8 +56,8 @@ udhcpc_start()
 	fi
 
 	case " ${args} " in
-		*" --quit "*|*" -q "*) x="/bin/busybox udhcpc";;
-		*) x="start-stop-daemon --start --exec /bin/busybox \
+		*" --quit "*|*" -q "*) x="busybox udhcpc";;
+		*) x="start-stop-daemon --start --exec busybox \
 			--pidfile \"${pidfile}\" -- udhcpc";;
 	esac
 
@@ -95,14 +95,14 @@ udhcpc_stop()
 	case " ${opts} " in
 		*" release "*)
 			start-stop-daemon --stop --quiet --signal USR2 \
-				--exec /bin/busybox --pidfile "${pidfile}"
+				--exec busybox --pidfile "${pidfile}"
 			if [ -f /var/cache/udhcpc-"${IFACE}".lease ]; then
 				rm -f /var/cache/udhcpc-"${IFACE}".lease
 			fi
 			;;
 	esac
 
-	start-stop-daemon --stop --exec /bin/busybox --pidfile "${pidfile}"
+	start-stop-daemon --stop --exec busybox --pidfile "${pidfile}"
 	eend $?
 
 	if [ -e "/run/udhcpc-${IFACE}.conf" ]; then

@@ -5,7 +5,7 @@
 
 pppd_depend()
 {
-	program /usr/sbin/pppd
+	program pppd
 	after interface
 	before dhcp
 	provide ppp
@@ -23,7 +23,7 @@ requote()
 
 pppd_version_int() {
 	# 002004008 is v2.4.8
-	printf '%03d' $(/usr/sbin/pppd --version | awk '/pppd version/ {print $3}' | tr '.' ' ')
+	printf '%03d' $(pppd --version | awk '/pppd version/ {print $3}' | tr '.' ' ')
 }
 
 pppd_is_ge_248()
@@ -153,7 +153,7 @@ pppd_pre_start()
 	opts="unit ${unit} ${opts}"
 
 	# Setup connect script
-	local chatprog="/usr/sbin/chat -e -E -v" phone=
+	local chatprog="chat -e -E -v" phone=
 	eval phone=\$phone_number_${IFVAR}
 	set -- ${phone}
 	[ -n "$1" ] && chatprog="${chatprog} -T '$1'"
@@ -230,10 +230,10 @@ pppd_pre_start()
 	if [ -n "${username}" ] \
 	&& [ -n "${password}" -o -z "${passwordset}" ]; then
 		printf "%s" "${password}" | \
-		eval start-stop-daemon --start --exec /usr/sbin/pppd \
+		eval start-stop-daemon --start --exec pppd \
 			--pidfile "${pidfile}" -- "${opts}" >/dev/null
 	else
-		eval start-stop-daemon --start --exec /usr/sbin/pppd \
+		eval start-stop-daemon --start --exec pppd \
 			--pidfile "${pidfile}" -- "${opts}" >/dev/null
 	fi
 
@@ -271,7 +271,7 @@ pppd_stop()
 
 	# Give pppd at least 30 seconds do die, #147490
 	einfo "Stopping pppd on ${IFACE}"
-	start-stop-daemon --stop --quiet --exec /usr/sbin/pppd \
+	start-stop-daemon --stop --quiet --exec pppd \
 		--pidfile "${pidfile}" --retry 30
 	eend $?
 }

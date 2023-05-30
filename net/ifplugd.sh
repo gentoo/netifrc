@@ -6,7 +6,7 @@ _config_vars="$_config_vars plug_timeout"
 
 ifplugd_depend()
 {
-	program start /usr/sbin/ifplugd
+	program start ifplugd
 	after macnet rename
 	before interface
 	provide plug
@@ -46,7 +46,7 @@ ifplugd_pre_start()
 	mark_service_inactive
 
 	# Start ifplugd
-	eval start-stop-daemon --start --exec /usr/sbin/ifplugd \
+	eval start-stop-daemon --start --exec ifplugd \
 		--pidfile "${pidfile}" -- "${args}" --iface="${IFACE}"
 	eend $? || return 1
 
@@ -89,7 +89,7 @@ ifplugd_stop()
 	[ ! -e "${pidfile}" ] && return 0
 
 	ebegin "Stopping ifplugd on ${IFACE}"
-	start-stop-daemon --stop --quiet --exec /usr/sbin/ifplugd \
+	start-stop-daemon --stop --quiet --exec ifplugd \
 		--pidfile "${pidfile}" --signal QUIT
 	eend $?
 }
