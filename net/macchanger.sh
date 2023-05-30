@@ -64,7 +64,7 @@ macchanger_pre_start()
 		*) opts="${opts} -m ${mac}";;
 	esac
 
-	if [ ! -x /usr/bin/macchanger ]; then
+	if ! command -v macchanger >/dev/null; then
 		eerror "For changing MAC addresses, emerge net-analyzer/macchanger"
 		return 1
 	fi
@@ -72,7 +72,7 @@ macchanger_pre_start()
 	for try in 1 2; do
 		# Sometimes the interface needs to be up
 		[ "${try}" -eq 2 ] && _up
-		output=$(/usr/bin/macchanger ${opts} "${IFACE}")
+		output=$(macchanger ${opts} "${IFACE}")
 		rc=$?
 		[ "${rc}" -eq 0 ] && break
 	done

@@ -9,7 +9,7 @@ _config_vars="$_config_vars mesh"
 
 iw_depend()
 {
-	program /usr/sbin/iw
+	program iw
 	after plug
 	before interface
 	provide wireless

@@ -6,11 +6,11 @@
 bonding_depend()
 {
 	before interface macchanger
-	program ip /sbin/ifconfig /bin/ifconfig
+	program ip ifconfig
 	# If you do not have sysfs, you MUST have this binary instead for ioctl
 	# Also you will loose some functionality that cannot be done via sysfs:
 	if [ ! -d /sys/class/net ]; then
-		program /sbin/ifenslave
+		program ifenslave
 	fi
 
 	local netns

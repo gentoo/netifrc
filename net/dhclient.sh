@@ -5,7 +5,7 @@
 dhclient_depend()
 {
 	after interface
-	program start /sbin/dhclient
+	program start dhclient
 	provide dhcp
 
 	# We prefer dhclient over these
@@ -48,7 +48,7 @@ dhclient_start()
 
 	# Bring up DHCP for this interface
 	ebegin "Running dhclient"
-	echo "${dhconf}" | start-stop-daemon --start --exec /sbin/dhclient \
+	echo "${dhconf}" | start-stop-daemon --start --exec dhclient \
 		--pidfile "${pidfile}" \
 		-- ${args} -q -1 -pf "${pidfile}" "${IFACE}"
 	eend $? || return 1
@@ -63,7 +63,7 @@ dhclient_stop()
 	[ ! -f "${pidfile}" ] && return 0
 
 	# Get our options
-	if [ -x /sbin/dhclient ]; then
+	if command -v dhclient >/dev/null; then
 		eval opts=\$dhcp_${IFVAR}
 		[ -z "${opts}" ] && opts=${dhcp}
 	fi
@@ -73,7 +73,7 @@ dhclient_stop()
 		*" release "*) dhclient -q -r -pf "${pidfile}" "${IFACE}";;
 		*)
 			start-stop-daemon --stop --quiet \
-				--exec /sbin/dhclient --pidfile "${pidfile}"
+				--exec dhclient --pidfile "${pidfile}"
 			;;
 	esac
 	eend $?

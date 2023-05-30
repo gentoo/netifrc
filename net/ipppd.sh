@@ -4,7 +4,7 @@
 
 ipppd_depend()
 {
-	program start /usr/sbin/ipppd
+	program start ipppd
 	after macnet
 	before interface
 	provide isdn
@@ -29,7 +29,7 @@ ipppd_pre_start()
 	eval opts=\$ipppd_${IFVAR}
 
 	einfo "Starting ipppd for ${IFACE}"
-	start-stop-daemon --start --exec /usr/sbin/ipppd \
+	start-stop-daemon --start --exec ipppd \
 		--pidfile "${pidfile}" \
 		-- ${opts} pidfile "${pidfile}" \
 		file "/etc/ppp/options.${IFACE}" >/dev/null
@@ -43,7 +43,7 @@ ipppd_post_stop()
 	[ ! -f "${pidfile}" ] && return 0
 
 	einfo "Stopping ipppd for ${IFACE}"
-	start-stop-daemon --stop --quiet --exec /usr/sbin/ipppd \
+	start-stop-daemon --stop --quiet --exec ipppd \
 		--pidfile "${pidfile}"
 	eend $?
 }

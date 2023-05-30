@@ -4,7 +4,7 @@
 
 pump_depend()
 {
-	program /sbin/pump
+	program pump
 	after interface
 	provide dhcp
 
@@ -49,7 +49,7 @@ pump_stop()
 {
 	# We check for a pump process first as querying for status
 	# causes pump to spawn a process
-	start-stop-daemon --quiet --test --stop --exec /sbin/pump || return 0
+	start-stop-daemon --quiet --test --stop --exec pump || return 0
 
 	# Check that pump is running on the interface
 	if ! pump --status --interface "${IFACE}" >/dev/null 2>&1; then

@@ -5,7 +5,7 @@
 
 adsl_depend()
 {
-	program /usr/sbin/adsl-start /usr/sbin/pppoe-start
+	program adsl-start pppoe-start
 	before dhcp
 }
 
@@ -13,11 +13,11 @@ adsl_setup_vars()
 {
 	local startstop="$1" cfgexe=
 
-	if [ -x /usr/sbin/pppoe-start ]; then
-		exe="/usr/sbin/pppoe-${startstop}"
+	if command -v pppoe-start >/dev/null; then
+		exe="pppoe-${startstop}"
 		cfgexe=pppoe-setup
 	else
-		exe="/usr/sbin/adsl-${startstop}"
+		exe="adsl-${startstop}"
 		cfgexe=adsl-setup
 	fi
 

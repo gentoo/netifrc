@@ -4,7 +4,7 @@
 
 clip_depend()
 {
-	program /usr/sbin/atmsigd
+    program atmsigd
     before interface
 }
 
@@ -23,7 +23,7 @@ atmclip_svc_start()
     start-stop-daemon --start \
 		--background \
 		--make-pidfile --pidfile "/run/$1.pid" \
-		--exec "/usr/sbin/$1" -- -l syslog
+		--exec "$1" -- -l syslog
     eend $?
 }
 
@@ -51,7 +51,7 @@ atmclip_svc_stop()
     ebegin "Stopping $2 Daemon ($1)"
     start-stop-daemon --stop --quiet \
 		--pidfile "/run/$1.pid" \
-		--exec "/usr/sbin/$1"
+		--exec "$1"
     eend $?
 }
 

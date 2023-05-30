@@ -6,7 +6,7 @@ _config_vars="$_config_vars plug_timeout"
 
 ifwatchd_depend()
 {
-	program start /usr/sbin/ifwatchd
+	program start ifwatchd
 	after macnet rename wireless
 	before interface
 	provide plug
@@ -33,7 +33,7 @@ ifwatchd_pre_start()
 
 	# Start ifwatchd
 	IN_BACKGROUND=yes ; export IN_BACKGROUND
-	start-stop-daemon --start --exec /usr/sbin/ifwatchd \
+	start-stop-daemon --start --exec ifwatchd \
 		-- -c "@LIBEXECDIR@/sh/ifwatchd-carrier.sh" \
 		-n "@LIBEXECDIR@/sh/ifwatchd-nocarrier.sh" "${IFACE}"
 	unset IN_BACKGROUND
@@ -47,13 +47,13 @@ ifwatchd_stop()
 {
 	yesno ${IN_BACKGROUND} && return 0
 
-	start-stop-daemon --test --quiet --stop --exec /usr/sbin/ifwatchd \
+	start-stop-daemon --test --quiet --stop --exec ifwatchd \
 		-- -c "@LIBEXECDIR@/sh/ifwatchd-carrier.sh" \
 		-n "@LIBEXECDIR@/sh/ifwatchd-nocarrier.sh" "${IFACE}" \
 		|| return 0
 
 	ebegin "Stopping ifwatchd on" "${IFACE}"
-	start-stop-daemon --stop --exec /usr/sbin/ifwatchd \
+	start-stop-daemon --stop --exec ifwatchd \
 		-- -c "@LIBEXECDIR@/sh/ifwatchd-carrier.sh" \
 		-n "@LIBEXECDIR@/sh/ifwatchd-nocarrier.sh" "${IFACE}"
 	eend $?

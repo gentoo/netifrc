@@ -5,7 +5,7 @@
 
 wireguard_depend()
 {
-	program /usr/bin/wg
+	program wg
 	after interface
 }
 
@@ -25,9 +25,9 @@ wireguard_pre_start()
 	ebegin "Configuring WireGuard interface $IFACE"
 	set -- $(_get_array "wireguard_$IFVAR")
 	if [ $# -eq 1 ]; then
-		/usr/bin/wg setconf "$IFACE" "$1"
+		wg setconf "$IFACE" "$1"
 	else
-		eval /usr/bin/wg set "$IFACE" "$@"
+		eval wg set "$IFACE" "$@"
 	fi
 	e=$?
 	if [ $e -eq 0 ]; then

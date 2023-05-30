@@ -3,7 +3,7 @@
 
 apipa_depend()
 {
-	program /sbin/arping /bin/arping
+	program arping
 }
 
 _random_uint16()

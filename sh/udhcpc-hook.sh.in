@@ -19,7 +19,7 @@ update_dns()
 	for i in ${dns} ; do
 		conf="${conf}nameserver ${i}\n"
 	done
-	if [ -x /sbin/resolvconf ] ; then
+	if command -v resolvconf >/dev/null; then
 		printf "${conf}" | resolvconf -a ${interface}
 	else
 		printf "${conf}" > /etc/resolv.conf
@@ -110,7 +110,7 @@ deconfig()
 	fi
 
 	if ! peer_var "${PEER_DNS}" ; then
-		[ -x /sbin/resolvconf ] && resolvconf -d "${interface}"
+		command -v resolvconf >/dev/null && resolvconf -d "${interface}"
 	fi
 }
 

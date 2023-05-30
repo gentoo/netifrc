@@ -7,7 +7,7 @@ _config_vars="$_config_vars blacklist_aps"
 
 iwconfig_depend()
 {
-	program /sbin/ifconfig
+	program ifconfig
 	after plug
 	before interface
 	provide wireless

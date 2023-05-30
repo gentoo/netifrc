@@ -6,7 +6,7 @@ _config_vars="$_config_vars plug_timeout"
 
 netplugd_depend()
 {
-	program start /sbin/netplugd
+	program start netplugd
 	after macnet rename
 	before interface
 	provide plug
@@ -47,7 +47,7 @@ netplugd_pre_start()
 	mark_service_inactive
 
 	# Start netplug
-	start-stop-daemon --start --exec /sbin/netplugd \
+	start-stop-daemon --start --exec netplugd \
 		--pidfile "${pidfile}" \
 		-- -i "${IFACE}" -P -p "${pidfile}" -c /dev/null
 	eend "$?" || return 1
@@ -91,7 +91,7 @@ netplugd_stop()
 	[ ! -e "${pidfile}" ] && return 0
 
 	ebegin "Stopping netplug on" "${IFACE}"
-	start-stop-daemon --stop --quiet --exec /sbin/netplugd \
+	start-stop-daemon --stop --quiet --exec netplugd \
 		--pidfile "${pidfile}"
 	eend $?
 }
