@@ -90,8 +90,8 @@ dhcpcd_stop()
 	eval opts=\$dhcp_${IFVAR}
 	[ -z "${opts}" ] && opts=${dhcp}
 	case " ${opts} " in
-		*" release "*) dhcpcd -k "${args}" "${IFACE}" ;;
-		*) dhcpcd -x "${args}" "${IFACE}" ;;
+		*" release "*) dhcpcd -k ${args} "${IFACE}" ;;
+		*) dhcpcd -x ${args} "${IFACE}" ;;
 	esac
 	[ -f "${argsfile}" ] && rm -f "${argsfile}"
 	eend $?
