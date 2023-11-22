@@ -7,7 +7,7 @@ iwd_depend()
 	before interface
 	provide wireless
 	after iwconfig
-	program iwd
+	program /usr/libexec/iwd
 }
 
 _config_vars="$_config_vars iwd"
