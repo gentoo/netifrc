@@ -25,12 +25,18 @@ dummy_pre_start()
 	eval dummy="\$type_${IFVAR}"
 	[ "${dummy}" = "dummy" ] || return 0
 
-	ebegin "Creating dummy interface ${IFACE}"
-	if _ip link add name "${IFACE}" type dummy ; then
-		eend 0 && _up && set_interface_type dummy
-	else
-		eend 1
+	if ! test -d /sys/module/dummy && ! modprobe dummy; then
+		eerror "Couldn't load the dummy module (perhaps the CONFIG_DUMMY kernel option is disabled)"
+		return 1
 	fi
+
+	if ! _exists ; then
+		ebegin "Creating dummy interface ${IFACE}"
+		_ip link add name "${IFACE}" type dummy
+		eend $?
+	fi
+
+	_up && set_interface_type dummy
 }
 
 
