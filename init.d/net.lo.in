@@ -902,7 +902,7 @@ stop()
 		yesno ${module} && _down 2>/dev/null
 	fi
 
-	type resolvconf >/dev/null 2>&1 && resolvconf -d "${IFACE}" 2>/dev/null
+	command -v resolvconf >/dev/null && resolvconf -d "${IFACE}" 2>/dev/null
 
 	if [ "$(command -v "postdown")" = "postdown" ]; then
 		ebegin "Running postdown"
