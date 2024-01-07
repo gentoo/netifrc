@@ -493,11 +493,10 @@
 
 #-----------------------------------------------------------------------------
 # DHCP
-# DHCP can be provided by dhclient, dhcpcd, pump or udhcpc.
+# DHCP can be provided by dhclient, dhcpcd, or udhcpc.
 #
 # dhclient: emerge net-misc/dhcp
 # dhcpcd:   emerge net-misc/dhcpcd
-# pump:     emerge net-misc/pump
 # udhcpc:   emerge sys-apps/busybox
 
 # If you have more than one DHCP client installed, you need to specify which
@@ -508,7 +507,6 @@
 # - All clients send the current hostname to the DHCP server by default
 # - dhcpcd does not daemonize when the lease time is infinite
 # - udhcp-0.9.3-r3 and earlier do not support getting NTP servers
-# - pump does not support getting NIS servers
 # - DHCP tends to erase any existing device information - so add
 #   static addresses after dhcp if you need them
 # - dhclient and udhcpc can set other resolv.conf options such as "option"
@@ -524,11 +522,10 @@
 # default) to 10 seconds.
 #dhcpcd_eth0="-t 10"
 
-# dhclient, udhcpc and pump don't have many runtime options
+# dhclient and udhcpc don't have many runtime options
 # You can pass options to them in a similar manner to dhcpcd though
 #dhclient_eth0="..."
 #udhcpc_eth0="..."
-#pump_eth0="..."
 
 # GENERIC DHCP OPTIONS
 # Set generic DHCP options like so

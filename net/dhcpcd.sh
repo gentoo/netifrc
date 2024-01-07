@@ -10,7 +10,7 @@ dhcpcd_depend()
 	provide dhcp
 
 	# We prefer dhcpcd over these
-	after udhcpc pump dhclient
+	after udhcpc dhclient
 }
 
 _config_vars="$_config_vars dhcp dhcpcd"
