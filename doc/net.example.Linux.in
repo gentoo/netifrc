@@ -1350,6 +1350,10 @@
 #
 # Wireguard can also be configured by passing explicit settings
 #wireguard_wg0="private-key /path/to/whatever listen-port 1234 peer ABCDEF= endpoint 1.2.3.4:2468"
+#
+# You must specify wireguard interface type to use arbitrary interface names
+#wireguard_site1="/path/to/site1.conf"
+#type_site1="wireguard"
 
 # Network namespace support 
 # If an interface is configured with a network namespace, it will be moved
