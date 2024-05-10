@@ -253,6 +253,14 @@ _add_route()
 		shift
 	fi
 
+	local rtype=
+
+	# Check if route type is provided that does not allow to use dev
+	# Route type must come first, before the prefix, also it cannot be used to list routes
+	case "$1" in
+		blackhole|prohibit|throw|unreachable) rtype="$1" ; shift ;;
+	esac
+
 	if [ $# -eq 3 ]; then
 		set -- "$1" "$2" via "$3"
 	elif [ "$3" = "gw" ]; then
@@ -280,13 +288,25 @@ _add_route()
 		cmd="${cmd} metric ${metric}"
 	fi
 
+	# Process dev vs nodev routes
+	# Positional parameters are used for correct array handling
+	if [[ -n ${rtype} ]]; then
+		local nodev_routes="$(service_get_value "nodev_routes")"
+		service_set_value "nodev_routes" "${nodev_routes}
+${family} route del ${rtype} ${cmd}"
+		set --
+	else
+		set -- dev "${IFACE}"
+	fi
+
 	# Check for route already existing:
-	_ip ${family} route show ${cmd_nometric} dev "${IFACE}" 2>/dev/null | \
+	_ip ${family} route show ${cmd_nometric} "$@" 2>/dev/null | \
 		grep -Fsq "${cmd%% *}"
 	route_already_exists=$?
 
-	_ip -v ${family} route append ${cmd} dev "${IFACE}"
+	_ip -v ${family} route append ${rtype} ${cmd} "$@"
 	rc=$?
+
 	# Check return code in some cases
 	if [ $rc -ne 0 ]; then
 		# If the route already exists, our default behavior is to WARN but continue.
@@ -301,7 +321,7 @@ _add_route()
 				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
 			eval $msgfunc "Route '$cmd_nometric' already existed:"
-			eval $msgfunc \"$(_ip $family route show ${cmd_nometric} dev "${IFACE}" 2>&1)\"
+			eval $msgfunc \"$(_ip $family route show ${cmd_nometric} \"$@\" 2>&1)\"
 		else
 			: # TODO: Handle other errors
 		fi
@@ -342,6 +362,7 @@ _trim() {
 # This allows for advanced routing tricks
 _ip_rule_runner() {
 	local cmd rules OIFS="${IFS}" family
+	local ru ruN
 	if [ "$1" = "-4" -o "$1" = "-6" ]; then
 		family="$1"
 		shift
@@ -515,6 +536,24 @@ _iproute2_route_flush() {
 	fi
 }
 
+_iproute2_route_undo() {
+	local OIFS="${IFS}"
+	local cmd cmdN
+	local routes="$(service_get_value "nodev_routes")"
+
+	veindent
+	local IFS="$__IFS"
+	for cmd in $routes ; do
+		unset IFS
+		cmdN="$(_trim "${cmd}")"
+		[ -z "${cmdN}" ] && continue
+		_ip -v ${cmd}
+		local IFS="$__IFS"
+	done
+	IFS="${OIFS}"
+	veoutdent
+}
+
 _iproute2_ipv6_tentative_output() {
 	LC_ALL=C _ip -family inet6 addr show dev ${IFACE} tentative
 }
@@ -571,6 +610,9 @@ iproute2_post_start()
 
 iproute2_post_stop()
 {
+	# Remove routes added without dev
+	_iproute2_route_undo
+
 	# Kernel may not have IP built in
 	if [ -e /proc/net/route ]; then
 		local rules="$(service_get_value "ip_rule")"

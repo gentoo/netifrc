@@ -780,9 +780,11 @@ ${routes}"
 		fi
 	fi
 
+	service_set_value "nodev_routes" ""
+
 	local OIFS="${IFS}" SIFS="${IFS-y}"
 	local IFS="$__IFS"
-	local fam
+	local cmd_head fam
 	for cmd in ${routes}; do
 		unset IFS
 		if ${first}; then
@@ -795,8 +797,13 @@ ${routes}"
 			-4" "*) fam="-4"; cmd=${cmd#-4 };;
 		esac
 
+		cmd_head=
+		case ${cmd%% *} in
+			blackhole|prohibit|throw|unreachable) cmd_head="${cmd_head} ${cmd%% *}"; cmd=${cmd#* };;
+		esac
+
 		eindent
-		ebegin ${cmd}
+		ebegin ${cmd_head} ${cmd}
 		# Work out if we're a host or a net if not told
 		case ${cmd} in
 			-net\ *|-host\ *);;
@@ -808,7 +815,7 @@ ${routes}"
 			*:*/*)                             cmd="-net ${cmd}";;
 			*)                                 cmd="-host ${cmd}";;
 		esac
-		_add_route ${fam} ${cmd}
+		_add_route ${fam} ${cmd_head} ${cmd}
 		eend $?
 		eoutdent
 	done
