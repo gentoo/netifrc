@@ -6,7 +6,7 @@
 wireguard_depend()
 {
 	program wg
-	after interface
+	before interface
 }
 
 wireguard_pre_start()
