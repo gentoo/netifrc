@@ -106,6 +106,16 @@
 #config_eth0="192.168.0.2/24 scope host
 #4321:0:1:2:3:4:567:89ab/64 nodad home preferred_lft 0"
 
+# Tokenized IPv6 addressing (as per ip-token(8)) is also possible.  This will
+# grab the last 64 bits of the IP address below, and use that to auto-configure
+# IPv6 addresses, when using SLAAC.  For example, given ::dead:beef below and an
+# advertised prefix of 100::/64 then Linux will configure an IPv6 address of
+# 100::dead:beef/64 on the interface.  You can use "tail-end IPv4 addresses" too.
+#ip6token_eth0="::dead:beef"
+#ip6token_eth0="::192.168.0.1"
+#ip6token_eth0="::dead:beef:192.168.0.1"
+#ip6token_eth0="::ffff:192.168.0.1" # OK because the prefix won't be ::/64.
+
 # Here's how to do routing if you need it
 # We add an IPv4 default route, IPv4 subnet route and an IPv6 unicast route
 #routes_eth0="default via 192.168.0.1
