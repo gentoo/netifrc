@@ -133,6 +133,7 @@ bonding_pre_start()
 		for IFACE in ${slaves}; do
 			_delete_addresses
 			_down
+			sysctl "net.ipv6.conf.${IFACE//./\/}.disable_ipv6=1" # Disable v6: https://bugs.gentoo.org/515640
 		done
 	fi
 	)

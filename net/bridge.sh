@@ -152,6 +152,7 @@ bridge_pre_start()
 				return 1
 			fi
 			# The interface is known to exist now
+			sysctl "net.ipv6.conf.${x//./\/}.disable_ipv6=1" # Disable v6: https://bugs.gentoo.org/515640
 			_up
 			if ${do_iproute2}; then
 				_netns ip link set "${x}" master "${BR_IFACE}"
