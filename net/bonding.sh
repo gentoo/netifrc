@@ -133,6 +133,8 @@ bonding_pre_start()
 		for IFACE in ${slaves}; do
 			_delete_addresses
 			_down
+			local disable_ipv6="/proc/sys/net/ipv6/conf/${IFACE}/disable_ipv6"
+			[ -f "${disable_ipv6}" ] && printf '1\n' > "${disable_ipv6}"
 		done
 	fi
 	)

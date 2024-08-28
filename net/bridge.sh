@@ -152,6 +152,8 @@ bridge_pre_start()
 				return 1
 			fi
 			# The interface is known to exist now
+			local disable_ipv6="/proc/sys/net/ipv6/conf/${IFACE}/disable_ipv6"
+			[ -f "${disable_ipv6}" ] && printf '1\n' > "${disable_ipv6}"
 			_up
 			if ${do_iproute2}; then
 				_netns ip link set "${x}" master "${BR_IFACE}"
