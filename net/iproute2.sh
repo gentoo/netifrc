@@ -290,7 +290,7 @@ _add_route()
 
 	# Process dev vs nodev routes
 	# Positional parameters are used for correct array handling
-	if [[ -n ${rtype} ]]; then
+	if [ -n ${rtype} ]; then
 		local nodev_routes="$(service_get_value "nodev_routes")"
 		service_set_value "nodev_routes" "${nodev_routes}
 ${family} route del ${rtype} ${cmd}"
