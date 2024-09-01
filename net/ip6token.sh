@@ -14,7 +14,7 @@ ip6token_pre_start()
 	eval tconfig=\$ip6token_${IFVAR}
 
 	[ -z "${tconfig}" ] && return 0
-	ip token set "${tconfig}" dev "${IFACE}" 
+	ip token set "${tconfig}" dev "${IFACE}"
 	return $?
 }
 
