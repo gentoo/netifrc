@@ -47,7 +47,7 @@ ifplugd_pre_start()
 
 	# Start ifplugd
 	eval start-stop-daemon --start --exec ifplugd \
-		--pidfile "${pidfile}" -- "${args}" --iface="${IFACE}"
+		--pidfile "${pidfile}" -- "${args}" -i "${IFACE}"
 	eend $? || return 1
 
 	eindent
