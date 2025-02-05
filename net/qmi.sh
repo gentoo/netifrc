@@ -30,6 +30,7 @@ qmi_pre_start() {
 	local auth
 	local username
 	local password
+	local qmicli_extra_args
 	local out
 	local rc
 
@@ -38,6 +39,7 @@ qmi_pre_start() {
 	eval auth=\$qmi_auth_${IFVAR}
 	eval username=\$qmi_username_${IFVAR}
 	eval password=\$qmi_password_${IFVAR}
+	eval qmicli_extra_args=\$qmi_qmicli_extra_args_${IFVAR}
 
 	[ -n "${apn}" ] || return 0
 
@@ -63,10 +65,11 @@ qmi_pre_start() {
 		fi
 	fi
 
+	ebegin "Connecting QMI APN '${apn}' using '${username}' and qmicli extra args '${qmicli_extra_args}'"
+
 	local wwan_connection="apn='${apn}',auth='${auth}',username='${username}',password='${password}',autoconnect=yes,ip-type=4"
 	local n
 	for n in 1 2 3; do
-		ebegin "Connecting QMI APN '${apn}' using '${username}'"
 
 		if out="$( \
 			qmicli \
@@ -74,6 +77,7 @@ qmi_pre_start() {
 				--wds-start-network="${wwan_connection}" \
 				--device-open-proxy \
 				--client-no-release-cid \
+				${qmicli_extra_args} \
 		)"; then
 			eend 0
 			break
