@@ -20,6 +20,10 @@ ip6token_pre_start()
 
 ip6token_post_stop()
 {
+	local tconfig
+	eval tconfig=\$ip6token_${IFVAR}
+
+	[ -z "${tconfig}" ] && return 0
 	ip token del dev "${IFACE}"
 	return $?
 }
