@@ -10,12 +10,13 @@ _config_vars="$_config_vars ip6token"
 
 ip6token_pre_start()
 {
-	local tconfig
+	local tconfig e
 	eval tconfig=\$ip6token_${IFVAR}
 
 	[ -z "${tconfig}" ] && return 0
+	ebegin "Setting iptoken on ${IFACE}: ${tconfig}"
 	ip token set "${tconfig}" dev "${IFACE}"
-	return $?
+	eend $e
 }
 
 ip6token_post_stop()
