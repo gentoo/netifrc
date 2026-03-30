@@ -321,7 +321,7 @@ ${family} route del ${rtype} ${cmd}"
 				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
 			eval $msgfunc "Route '$cmd_nometric' already existed:"
-			eval $msgfunc \"$(_ip $family route show ${cmd_nometric} \"$@\" 2>&1)\"
+			eval $msgfunc \"$(_ip $family route show ${cmd_nometric} "$@" 2>&1)\"
 		else
 			: # TODO: Handle other errors
 		fi
