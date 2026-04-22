@@ -487,6 +487,14 @@ iproute2_pre_start()
 		eend $? || return 1
 		_up
 	fi
+	local alias=
+	eval alias=\$alias_${IFVAR}
+	if [ -n "${alias}" ]; then
+		ebegin "Setting ${IFVAR} alias to ${alias}"
+		_ip -v ${ipproto} link set "${IFACE}" alias "${alias}"
+		eend $? || return 1
+		_up
+	fi
 
 	# MTU support
 	local mtu=
