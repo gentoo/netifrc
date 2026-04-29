@@ -229,8 +229,8 @@ _add_address()
 				error|fatal) msgfunc=eerror rc=1;;
 				*) msgfunc=eerror rc=1 ; eerror "Unknown error behavior: $eh_behavior" ;;
 			esac
-			eval $msgfunc "Address ${address}${netmask:+/}${netmask} already existed!"
-			eval $msgfunc \"$(_ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)\"
+			$msgfunc "Address ${address}${netmask:+/}${netmask} already existed!"
+			$msgfunc "$(_ip addr show to "${address}/${family_maxnetmask}" dev "${IFACE}" 2>&1)"
 		else
 			: # TODO: Handle other errors
 		fi
