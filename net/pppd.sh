@@ -23,7 +23,7 @@ requote()
 
 pppd_version_int() {
 	# 002004008 is v2.4.8
-	printf '%03d' $(pppd --version | awk '/pppd version/ {print $3}' | tr '.' ' ')
+	printf '%03d' $(pppd --version | sed -nre 's/.*pppd version ([0-9.]*)(-dev)?$/\1/p' | tr '.' ' ')
 }
 
 pppd_is_ge_248()
