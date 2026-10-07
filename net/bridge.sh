@@ -157,6 +157,24 @@ bridge_pre_start()
 			_up
 			if ${do_iproute2}; then
 				_netns ip link set "${x}" master "${BR_IFACE}"
+				if command -v bridge >/dev/null 2>&1; then # requires sys-apps/iproute[-minimal]
+					eval local pvid=\$brport_pvid_${IFVAR}
+					eval local vlan=\$brport_vlan_${IFVAR}
+					local v=
+					eindent
+					# first remove the default configured VLAN, we will potentially re-add
+					# but that's ok.
+					_netns bridge vlan del dev "${x}" vid 1
+					if [ -n "${vlan}" ]; then
+						for v in ${vlan}; do
+							einfo "Adding VLAN ${v}"
+							_netns bridge vlan add dev "${x}" vid "${v}"
+						done
+					fi
+					einfo "Setting PVID ${pvid:-1}"
+					_netns bridge vlan add dev "${x}" vid "${pvid:-1}" pvid untagged
+					eoutdent
+				fi
 			elif ${do_brctl}; then
 				brctl addif "${BR_IFACE}" "${x}"
 			fi

@@ -1053,6 +1053,14 @@
 #bridge_forward_delay_br0="10"
 #brport_hairpin_mode_eth0="1"
 
+# If you are using sys-apps/iproute2 without USE=minimal, you can configure
+# port VLAN filtering (802.1Q) and Native PVID values.  It is not required to
+# list the PVID within the allowed VLAN array; however, if no PVID is
+# explicitly defined, it will default to 1 (historical behavior).
+# NOTE:  You must also set bridge_vlan_filtering_br0="1" for this to work correctly.
+#brport_vlan_eth0="4 5 6"
+#brport_pvid_eth0="100"
+
 # It is important to include bridge_forward_delay_br0=0 and
 # bridge_hello_time_br0=1000 in the /etc/conf.d/net file in order to bring the
 # bridge interface up quickly. Other values will cause network packets to be
