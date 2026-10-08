@@ -1,7 +1,7 @@
 DIR=	${LIBEXECDIR}/sh
 SRCS= ${SRCS-${OS}}
 INC=
-BIN=	${BIN-${OS}}
+BIN=	ifplugged.sh ${BIN-${OS}}
 
 MK=	../mk
 include ${MK}/os.mk
