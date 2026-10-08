@@ -46,8 +46,8 @@ ifplugd_pre_start()
 	mark_service_inactive
 
 	# Start ifplugd
-	eval start-stop-daemon --start --exec ifplugd \
-		--pidfile "${pidfile}" -- "${args}" -i "${IFACE}"
+	eval start-stop-daemon --start --exec ifplugd --pidfile "${pidfile}" \
+		-- "${args}" -i "${IFACE}" -r /lib/netifrc/sh/ifplugged.sh
 	eend $? || return 1
 
 	eindent
