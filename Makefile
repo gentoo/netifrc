@@ -15,5 +15,7 @@ include ${MK}/subdir.mk
 include ${MK}/dist.mk
 include ${MK}/git.mk
 
+INC-Linux=ifplugged.sh
+
 _installafter: realinstall
 	${ECHO} "${VERSION}${GITVER}" > ${DESTDIR}/${LIBEXECDIR}/version
