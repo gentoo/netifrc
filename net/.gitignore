@@ -1,5 +1,8 @@
 ifconfig.sh
+ifconfig.sh.in
+ifplugd.sh
 ifwatchd.sh
 iwconfig.sh
+iwconfig.sh.in
 udhcpc.sh
-ifplugd.sh
+udhcpc.sh.in
