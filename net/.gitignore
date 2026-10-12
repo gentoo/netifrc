@@ -2,3 +2,4 @@ ifconfig.sh
 ifwatchd.sh
 iwconfig.sh
 udhcpc.sh
+ifplugd.sh

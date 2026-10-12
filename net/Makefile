@@ -9,7 +9,7 @@ include ${MK}/os.mk
 SRCS-FreeBSD=	iwconfig.sh.in
 INC-FreeBSD=	iwconfig.sh
 
-SRCS-Linux=	iwconfig.sh.in udhcpc.sh.in
+SRCS-Linux=	iwconfig.sh.in udhcpc.sh.in ifplugd.sh.in
 INC-Linux=	adsl.sh apipa.sh arping.sh bonding.sh br2684ctl.sh bridge.sh \
 		ccwgroup.sh clip.sh ethtool.sh iproute2.sh ip6token.sh ifplugd.sh ip6to4.sh \
 		ipppd.sh iwconfig.sh netplugd.sh pppd.sh tuntap.sh udhcpc.sh \
